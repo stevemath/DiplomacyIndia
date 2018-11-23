@@ -1,0 +1,44 @@
+<div data-role="view" data-title="View" data-stretch="true" data-layout="main" data-model="app.network" data-show="app.network.onShow" data-after-show="app.network.afterShow" id="network" class="screen">
+    <header data-role="header">
+        <div data-role="navbar" class="header-text">
+
+          
+
+        </div>
+    </header>
+
+
+    <!-- START_CUSTOM_CODE_login -->
+    <!-- Add custom code here. For more information about custom code, see http://docs.telerik.com/platform/screenbuilder/troubleshooting/how-to-keep-custom-code-changes 
+        
+        <canvas id="networkmap" width="950" height="680"></canvas>
+   
+        -->
+   
+    <div style="position:absolute;top:0px;left:0px;z-index:10000;">
+        <div class="red-btn-container close-button ib" onclick="navToGame()" data-text="Close" data-width="150" data-height="45"></div>
+        <div class="red-btn-container close-button ib" onclick="reset()" data-text="Reset" data-width="150" data-height="45"></div>
+</div>
+    <script id="redButtonTemplate" type="text/x-kendo-template">
+        <div class="red-button" style="#=styles#">
+
+            <div class="btn-divider upper"></div>
+            <div class="btn-divider left"></div>
+            <div class="btn-divider lower"></div>
+            <div class="btn-divider right"></div>
+            <div class="btn-line lower"></div>
+            <div class="btn-line upper"></div>
+            <div class="btn-line left"></div>
+            <div class="btn-line right"></div>
+            <div class="btn-corner ll"></div>
+            <div class="btn-corner lr"></div>
+            <div class="btn-corner ur"></div>
+            <div class="btn-corner ul"></div>
+            <div class="btn-text">
+                #=text#
+            </div>
+        </div>
+    </script>
+    
+    <!-- END_CUSTOM_CODE_login -->
+</div>

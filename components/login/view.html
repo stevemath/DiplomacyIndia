@@ -1,0 +1,90 @@
+<div data-role="view" data-title="China: Diplomatic Dragon: An educational game about diplomacy and China's geography, culture, and history." data-stretch="true" data-layout="main" data-model="app.login" data-show="app.login.onShow" data-after-show="app.login.afterShow" id="loginScreen" class="screen">
+    <header data-role="header">
+        <div data-role="navbar" class="header-text">
+
+            <span data-bind="text: strings.login.title"></span>
+
+        </div>
+    </header>
+
+
+    <!-- START_CUSTOM_CODE_login -->
+    <!-- Add custom code here. For more information about custom code, see http://docs.telerik.com/platform/screenbuilder/troubleshooting/how-to-keep-custom-code-changes -->
+    LOGIN
+
+  <canvas id="testC" width="500" height="500"></canvas>
+    <div id="divT">touch</div>
+    <button   style="margin:100px;" id="aTest">play audio</button>
+
+    <div class="audioContent" style="display:none">
+        <button id="audioTrigger"></button>
+        <audio id="audio-discover" preload="auto" loop>
+            <source src="audio/vitm10.mp3" type="audio/mpeg">
+            <source src="audio/vitm10.ogg" type="audio/ogg">
+
+        </audio>
+
+    </div>
+    <!-- END_CUSTOM_CODE_login -->
+</div>
+<script>
+
+    function setupaudio() {
+
+        c1 = new fabric.Canvas('testC');
+        var circle = new fabric.Circle({
+            id: 4, radius: 25,  left: 100 , top: 100
+        });
+
+        circle.set('fill', "#990000")
+        circle.set("stroke", "#202020");
+        circle.set("strokeWidth", 3);
+        c1.add(circle);
+        circle.bringToFront();
+        circle.moveTo(10);
+        circle.hasControls = false;
+        circle.hasBorders = false;
+        circle.hoverCursor = "pointer";
+        circle.lockMovementX = true;
+        circle.lockMovementY = true;
+       
+
+        //$("#aTest").kendoTouch({ touchend: function (e) { console.log(e); alert("play"); } });
+        // $("#divT").kendoTouch({ touchend: function (e) { console.log(e); alert("play"); } });
+
+        //c1.on('mouse:down', function (options) {
+        //      console.log("canvas click")
+        //    console.log(options);
+        //})
+        window.fabric.util.addListener(c1.upperCanvasEl, 'click', function (event, self) {
+            //alert('click')
+            playaudio1();
+            var targ = c1.findTarget(event);
+            console.log(targ.id);
+           
+        });
+
+            //$("#aTest").on("mousedown", function () {
+            
+            //    var ael = document.getElementById("audio-discover")
+            //    ael.play();
+            //});
+
+          //  $("#aTest").trigger("click")
+
+        }
+        //$("#aTest").on("touchend click", function () {
+        
+        //    //    var ael = document.getElementById("audio-discover")
+        //    //    ael.play();
+        //});
+        function playaudio1() {
+               
+                var ael = document.getElementById("audio-discover")
+                ael.play();
+
+        }
+
+      //  
+
+</script>

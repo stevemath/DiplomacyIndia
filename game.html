@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>China: Diplomatic Dragon: An educational game about diplomacy and China's geography, culture, and history.</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link href="kendo/styles/kendo.mobile.all.min.css" rel="stylesheet">
+
+    <link href="styles/overrides.css" rel="stylesheet">
+    <link href="styles/main.css" rel="stylesheet">
+
+    <link href="styles/gameStyles.css" rel="stylesheet" />
+   
+    <script src="kendo/js/jquery.min.js"></script>
+    <script src="kendo/js/kendo.mobile.min.js"></script>
+   
+    <!--        
+    <script src="cordova.js"></script>
+         <script src="js/effects/fire/fire.js"></script>
+    -->
+   
+    <script src="js/hidebar.js"></script>
+    <style>
+        /* DEMO ONLY for this short page - remove in live code */
+        body {
+            min-height: 480px;
+        }
+    </style>
+  
+</head>
+
+<body >
+
+    <script>
+
+        $(document).ready(function () {
+
+
+            $("p").on("click", function () {
+                scrollTo(0,100)
+            })
+
+        });
+    </script>
+    <p>The script on this page should hide the address bar on iOS and Android.</p>
+</body>
+
+</html>

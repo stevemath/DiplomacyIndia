@@ -1,0 +1,169 @@
+<div data-role="view" data-title="View" data-reload="true" data-layout="main" data-model="app.home" data-show="app.home.onShow" data-after-show="app.home.afterShow" id="homeScreen" class="screen">
+    <header data-role="header">
+        <div data-role="navbar" class="header-text">
+
+            <span data-bind="text: strings.home.title"></span>
+
+        </div>
+    </header>
+
+
+    <!-- START_CUSTOM_CODE_home -->
+    <!-- Add custom code here. For more information about custom code, see http://docs.telerik.com/platform/screenbuilder/troubleshooting/how-to-keep-custom-code-changes -->
+
+
+    <canvas width="950" height="680" id="chinaCanvas"></canvas>
+
+    <div id="toolbar">
+        <div id="tools">
+            <div class="tool-item reset" data-badge="Sept 21"> <i class="fa fa-calendar"></i>Calendar</div>
+            <div class="tool-item" data-badge="4"><i class="fa fa-sitemap"></i>Network</div>
+            <div class="tool-item" data-badge="1"> <i class="fa fa-trophy"></i>Achievements</div>
+            <div class="tool-item" data-badge="2"> <i class="fa fa-clone"></i><span>Bush Cards</span></div>
+        </div>
+    </div>
+
+    <div id="statusbar">
+        <div id="statusWrapper">
+
+            <div class="nav-item dip-level">
+
+                <img style="display:block;" src="images/system/chinese-dragon.png" />
+            </div>
+            <div class="nav-item instructions">
+                <div class="headline">What do you want to do next?</div>
+                <div>Look at your possible activities and choose those that will help you reach your goals.</div>
+            </div>
+            <div class="nav-item status">
+                <div class="rank">Newbie Diplomat</div>
+                <div class="current-points">475 points</div>
+            </div>
+
+            <div class="clear status-expand">
+                <span class="panel-hide"> <i class="fa fa-caret-up"></i> hide</span>
+                <span class="panel-show"> <i class="fa fa-caret-down"></i> show</span>
+            </div>
+        </div>
+
+    </div>
+    <div id="legend">
+        <div class="show-legend">Show Legend</div>
+        <div class="legend-content">
+            <div class="close-legend">X</div>
+            <div class="title">LEGEND</div>
+            <div class="title">Do Diplomacy <span class="legend-symbol short">
+    <img src="images/system/triangle.png" />
+</span> <span class="legend-symbol tall">
+    <img src="images/system/triangle.png" />
+</span></div>
+            <ul>
+                <li>Low Risk/Reward <span class="legend-symbol short">
+                                            <img src="images/system/triangle.png" /></span></li>
+                <li>High Risk/Reward <span class="legend-symbol tall">
+    <img src="images/system/triangle.png" />
+</span></li>
+            </ul>
+            <div class="title">Discover China <span class="legend-symbol circle"><img src="images/system/circle.png" /></span></div>
+        </div>
+    </div>
+
+
+    <script id="diplomacyTemplate" type="text/x-kendo-template">
+        <div class="card-wrapper">
+            <div class="diplomacy-container">
+                <div class="dip-front">
+                    <div class="card-content">
+                        <div class="heading">DO DIPLOMACY</div>
+                        <div class="task-text">#= intro#</div>
+                        <div class="dip-btns">
+                            <button class="k-button large cancel">Cancel</button>
+                            <button class="k-button large accept">Do This!</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="dip-back">
+                    <div class="card-content">
+                        <div class="heading">DO DIPLOMACY</div>
+                        <div class="q-wrapper">
+                            <div class="q-text">#= q#</div>
+                            # for (var i=0;i
+                            < answers.length ;i++){# <div>
+                                <button class="k-button small  dip-btn" data-corr="#=answers[i].correct#">#=answers[i].text#</button>
+                        </div>
+                        #}#
+                    </div>
+
+                    <div class="resp-wrapper">
+                        <div class="corr-resp">
+                            <div class="title">#=correctResponse.title #</div>
+                            <div class="q-text">#= correctResponse.text#</div>
+                            #if(correctResponse.subtext != ""){#
+                            <div class="subtext">#= correctResponse.subtext#</div>
+                            #}# #if(correctResponse.bullets.length > 0){#
+                            <ul>
+                                #for(var i = 0; i
+                                < correctResponse.bullets.length; i++ ){# <li class="bullet">#= correctResponse.bullets[i]#</li>
+                                    #}#
+                            </ul>
+                            #}#
+                        </div>
+                        <div class="incorr-resp">
+                            <div class="title">#=incorrectResponse.title #</div>
+                            <div class="q-text">#= incorrectResponse.text#</div>
+                            #if(incorrectResponse.subtext != ""){#
+                            <div class="subtext">#= incorrectResponse.subtext#</div>
+                            #}# #if(incorrectResponse.bullets.length > 0){#
+                            <ul>
+                                #for(var i = 0; i
+                                < incorrectResponse.bullets.length; i++ ){# <li class="bullet">#= incorrectResponse.bullets[i]#</li>
+                                    #}#
+                            </ul>
+                            #}#
+                        </div>
+                        <div>
+                            <button class="k-button small continue">Continue</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+</script>
+
+<script id="discoveryTemplate" type="text/x-kendo-template">
+    <div class="card-wrapper">
+        <div class="discovery-container">
+            <div class="dis-front">
+                <div class="card-content">
+                    <div class="heading">DISCOVER CHINA</div>
+                    <div class="task-text">#= intro#</div>
+                    <div class="dip-btns">
+                        <button class="k-button large cancel">Cancel</button>
+                        <button class="k-button large accept">Do This!</button>
+                    </div>
+                </div>
+            </div>
+            <div class="dis-back">
+                <div class="card-content">
+                    <div class="heading">DISCOVER CHINA</div>
+                    <div class="q-wrapper">
+                        <div class="info-text">#= info#</div>
+                        # for (var i=0;i
+                        < facts.length ;i++){# <div class="fact">#=facts[i].text#</div>
+                    #}#
+                </div>
+
+                <div>
+                    <button class="k-button small continue">Continue</button>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    </div>
+</script>
+
+
+<!-- END_CUSTOM_CODE_home -->
+</div>

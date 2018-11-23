@@ -1,0 +1,194 @@
+<div data-role="view" data-title="China: Diplomatic Dragon: An educational game about diplomacy and China's geography, culture, and history." data-stretch="true" data-layout="main" data-model="app.intro" data-show="app.intro.onShow" data-after-show="app.intro.afterShow" id="intro" class="screen">
+    <header data-role="header">
+        <div data-role="navbar" class="header-text">
+
+          
+
+        </div>
+    </header>
+
+
+    <!-- START_CUSTOM_CODE_login -->
+    <!-- Add custom code here. For more information about custom code, see http://docs.telerik.com/platform/screenbuilder/troubleshooting/how-to-keep-custom-code-changes -->
+   <div class="intro-panel intro1">
+       <div class="intro-btn-wrapper">
+           <div class="app-link appstore">
+               <img src="images/system/App-Store.png" />
+           </div>
+           <div class="red-btn-container intro-button ib" data-text="Begin!" data-width="250" data-height="90"></div>
+           <div class="app-link googlestore">
+               <img src="images/system/Google.png" />
+           </div>
+       </div>
+       <div class="show-credits">
+          <div class="about-bkgrd"></div>
+          <div class="about-text"> About This Game</div>
+      </div>
+       <div id="lowerBlockWrapper">
+           <div class="close-credits"><i class="fa fa-times-circle-o fa-2x"></i></div>
+           <div id="lowerBlock">
+
+               <div class="lower left">
+
+                   <div class="logo-img bush-link">
+                       <img src="images/system/george-bush-library-museum-logo.png" />
+                   </div>
+
+                   <div class="credits-head">
+                       Credits:
+                   </div>
+                   <div class="divider"></div>
+                   <div class="credits-subhead">
+                       <em> China, Diplomatic Dragon </em>is an educational game about China and international diplomacy, by the George Bush Presidential Library.
+                   </div>
+
+                   <div class="credits-text">
+
+                       Directed and produced by Dr. Shirley Hammond, Director of Education<br />
+                       <span class="linktext gwb">George Bush Presidential Library and Museum</span><br />
+                       &copy; 2017 George Bush Presidential Library Foundation<br /><br />
+
+                       Game design and development by <span class="linktext eduweb-link">eduweb</span>.
+
+                   </div>
+
+
+               </div>
+
+               <div class="lower right">
+                   <div class="thanks-img">
+                       <img src="images/system/NA-logo.png" />
+                   </div>
+
+                   <div class="credits-head">
+
+                       Thanks to:
+                   </div>
+                   <div class="divider"></div>
+
+                   <div class="thanks-text">
+
+
+                       <div class="role"><span class="bold">Mary Finch, </span>Audiovisual Archivist</div>
+
+                       <div class="role">Audiovisual Historical Records</div>
+                       <div class="role">George H.W. Bush Presidential Library</div>
+                       <div class="role">and Museum, College Station, TX.</div>
+                       <div class="img-credits">Image Credits</div>
+                   </div>
+
+               </div>
+               <div class="clear"></div>
+           </div>
+       </div>
+   </div>
+
+    <div class="intro-panel intro2">
+
+         <div class="red-btn-container intro-button ib" data-text="Continue" data-width="250" data-height="90"></div>
+
+    </div>
+
+    <div class="intro-panel intro3">
+
+        <div class="red-btn-container intro-button ib wide" data-text="Go to China!" data-width="320" data-height="90"></div>
+
+    </div>
+
+    
+
+    <div class="intro-panel intro4">
+        <div class="intro-dragon">
+            <img  src="images/system/intro/introdragon.png" />
+        </div> 
+    <div class="red-btn-container intro-button ib wide" data-text="Get Started!" data-width="320" data-height="90"></div>
+
+    </div>
+
+
+    <script id="redButtonTemplate" type="text/x-kendo-template">
+        <div class="red-button" style="#=styles#">
+
+            <div class="btn-divider upper"></div>
+            <div class="btn-divider left"></div>
+            <div class="btn-divider lower"></div>
+            <div class="btn-divider right"></div>
+            <div class="btn-line lower"></div>
+            <div class="btn-line upper"></div>
+            <div class="btn-line left"></div>
+            <div class="btn-line right"></div>
+            <div class="btn-corner ll"></div>
+            <div class="btn-corner lr"></div>
+            <div class="btn-corner ur"></div>
+            <div class="btn-corner ul"></div>
+            <div class="btn-text">
+                #=text#
+            </div>
+        </div>
+    </script>
+    
+
+    <script id="creditsTemplate" type="text/x-kendo-template">
+
+        <div class="card-wrapper">
+            <div class="credits-container">
+
+                <div class="levelup-card">
+                    <div class="outer-wrapper">
+                        <div class="corner"></div><div class="corner"></div><div class="corner"></div><div class="corner"></div>
+                        <div class="inner-content">
+
+                            <div class="card-content">
+
+                                <div class="heading">IMAGE CREDITS</div>
+
+                              <div id="imgCredits"></div>
+
+
+                                <div class="dip-btns">
+                                    <div class="red-btn-container close-imgcredits ib" data-text="Continue" data-width="180" data-height="60"></div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </script>
+
+    <script id="creditsTemplate2" type="text/x-kendo-template">
+        <div class="card-wrapper">
+            <div class="credits-container">
+                
+                    <div class="outer-wrapper">
+                        <div class="corner"></div><div class="corner"></div><div class="corner"></div><div class="corner"></div>
+                        <div class="inner-content">
+
+                            <div class="card-content">
+                                <div class="heading">IMAGE CREDITS</div>
+                                <div class="task-text">#= intro#</div>
+                                <div class="dip-btns">
+                                   
+                                    <div class="red-btn-container close-credits ib" data-text="Close" data-width="150" data-height="60"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    
+                </div>
+            </div>
+           
+        </div>
+
+    </script>
+
+    
+    <div>
+        <img src="images/system/mapbkgrd.jpg" style="display:none;" />
+    </div>
+  
+    <!-- END_CUSTOM_CODE_login -->
+</div>
