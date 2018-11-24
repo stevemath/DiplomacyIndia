@@ -2,51 +2,51 @@
 <html>
 
 <head>
-    <title>China: Diplomatic Dragon: An educational game about diplomacy and China's geography, culture, and history.</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, width=device-width, height=device-height">
-    <!-- This policy allows everything (eg CSS, AJAX, object, frame, media, etc) except that
-        * CSS only from the same origin and inline styles,
-        * scripts only from the same origin and inline styles, and eval()
-    -->
-    <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+	<title>China: Diplomatic Dragon: An educational game about diplomacy and China's geography, culture, and history.</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1, width=device-width, height=device-height">
+	<!-- This policy allows everything (eg CSS, AJAX, object, frame, media, etc) except that
+		* CSS only from the same origin and inline styles,
+		* scripts only from the same origin and inline styles, and eval()
+	-->
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+	<script src="https://www.gstatic.com/firebasejs/4.9.0/firebase.js"></script>
+	<link href="kendo/styles/kendo.mobile.all.min.css" rel="stylesheet">
+	<link href="styles/font-awesome.min.css" rel="stylesheet" />
+	<link href="styles/overrides.css" rel="stylesheet">
+	<link href="styles/main.css" rel="stylesheet">
 
-    <link href="kendo/styles/kendo.mobile.all.min.css" rel="stylesheet">
-    <link href="styles/font-awesome.min.css" rel="stylesheet" />
-    <link href="styles/overrides.css" rel="stylesheet">
-    <link href="styles/main.css" rel="stylesheet">
+	<link href="styles/gameStyles.css" rel="stylesheet" />
 
-    <link href="styles/gameStyles.css" rel="stylesheet" />
-   
-    <script src="kendo/js/jquery.min.js"></script>
-    <script src="kendo/js/kendo.mobile.min.js"></script>
-  
-    <script src="js/settings.js?q=12.19.2018"></script>
+	<script src="kendo/js/jquery.min.js"></script>
+	<script src="kendo/js/kendo.mobile.min.js"></script>
 
-    <script src="app.js"></script>
-     
-    <script src="cordova.js"></script>
-     <script src="js/utilities.js"></script>
-    <script src="js/localesMgmt.js"></script>
-    <script src="js/configData.js"></script>
-    <script src="js/gamePlay.js"></script>
+	<script src="js/settings.js?q=12.19.2018"></script>
 
-    <script src="js/fabric.min.js"></script>
-    <script src="js/everlive.all.min.js"></script>
-    
-    <!--   
-        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">     
-        <script src="https://bs-static.cdn.telerik.com/1.6.12/everlive.all.min.js"></script>
-    <script src="https://bs-static.cdn.telerik.com/1.9.4/everlive.all.min.js"></script>
+	<script src="app.js"></script>
 
-         <script src="js/effects/fire/fire.js"></script>
-    -->
-   
-    <script src="js/effects/smoke/smoke.js"></script>
-    <script src="js/effects/fire/fire.js"></script>
+	<script src="cordova.js"></script>
+	<script src="js/utilities.js"></script>
+	<script src="js/localesMgmt.js"></script>
+	<script src="js/configData.js"></script>
+	<script src="js/gamePlay.js"></script>
 
-    <script src="js/network.js"></script>
-   
+	<script src="js/fabric.min.js"></script>
+	<script src="js/everlive.all.min.js"></script>
+
+	<!--
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+		<script src="https://bs-static.cdn.telerik.com/1.6.12/everlive.all.min.js"></script>
+	<script src="https://bs-static.cdn.telerik.com/1.9.4/everlive.all.min.js"></script>
+
+		 <script src="js/effects/fire/fire.js"></script>
+	-->
+
+	<script src="js/effects/smoke/smoke.js"></script>
+	<script src="js/effects/fire/fire.js"></script>
+
+	<script src="js/network.js"></script>
+
 </head>
 
 <body id="kendoUiMobileApp">
