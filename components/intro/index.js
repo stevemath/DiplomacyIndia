@@ -31,13 +31,15 @@ app.intro = kendo.observable({
         });
 
         $(".intro2 .red-btn-container").on("click touchend", function () {
-            app.intro.slidePanel("intro2", "intro3");
+
+           
+             app.intro.slidePanel("intro2", "intro3");
 
         });
 
         $(".intro3 .red-btn-container").on("click touchend", function () {
-            app.intro.slidePanel("intro3", "intro4");
-           
+           // app.intro.slidePanel("intro3", "intro4");
+            app.intro.navToGame();
         });
 
         $(".intro4 .red-btn-container").on("click touchend", function () {
@@ -106,10 +108,7 @@ app.intro = kendo.observable({
        kendo.fx(newPanel).slideIn("left").duration(800).play();
        newPanel.show();
 
-       if (newPanelId == "intro4") {
-           self.startFire(".intro4");
-
-       }
+      
     },
     resizeIntro: function () {
         var h = $(window).height();
@@ -119,7 +118,7 @@ app.intro = kendo.observable({
         };
 
         var btnMargin = h * bScale;
-        this.resizeDragon();
+       
        
 
  $(".intro-panel").css("height", h + "px");
@@ -128,46 +127,11 @@ app.intro = kendo.observable({
 
     },
     resizeDragon: function () {
-       var iw = 2000;
-      var  ih = 1182;
-      var  w = $(window).width();
-      var h = $(window).height();
-      var iRatio = 1;
-
-        if (iw / w > ih / h) {
-            console.log("expand to fs height");
-            iRatio = h / ih;
-        } else {
-            console.log("expand to fs width")
-            iRatio = w / iw; 
-        }
-        console.log(iRatio)
-
-        var transTop = (1 - iRatio) * 100 - 2;
-        $(".intro-dragon").css({ transform: 'translate(0% ,-' + transTop + '%) scale(' + iRatio + ')' });
-       
+     
     }
 ,
     startFire: function (elem) {
-        console.log("start fire")
-        if ($("#fire")) {
-            $("#fire").remove();
-        }
-      
-        $(".intro-dragon").prepend("<canvas id='fire' width='400' height='300' style='position:absolute;pointer-events:none;z-index:19' />")
-          var imgw = $(elem).find(".intro-dragon").width();
-        var elemw = $(elem).width();
        
-        var pLeft = imgw -130;
-        console.log(pLeft);
-       
-        var pTop = $(elem).position().top - 35;
-
-        $("#fire").css("left", pLeft + "px");
-        $("#fire").css("top", pTop + "px");
-        $("#fire").css("z-index", 10);
-        cr_createRuntimeFire("fire");
-        var timeout = setTimeout('$("#fire").remove();', 5500);
     },
     afterShow: function () {
         if (checkSimulator() == false && window.screen.lockOrientation) {
@@ -175,8 +139,7 @@ app.intro = kendo.observable({
         }
     },
     beforeHide: function () {
-        
-        $("#fire").remove();
+       
     },
     navToGame: function () {
         app.mobileApp.navigate("components/home/view.html")
@@ -186,7 +149,9 @@ app.intro = kendo.observable({
         var self = this;
         console.log("show credits");
         setTimeout(function () {
-           
+
+
+            $(".credits-container").remove();
             var template = kendo.template($("#creditsTemplate").html());
             var creditsHtml = kendo.render(template, [{}]);
            
@@ -200,14 +165,14 @@ app.intro = kendo.observable({
             var w = $(window).width();
             var h = $(window).height();
             var dw = $(".credits-container").width();
-            var dh = $(".credits-container").height();
-            var topOffset = 10;
+            var dh = $(".credits-container").height()*.7;
+            var topOffset = 0;
             var scale = 1;
-            var marginThreshold = 125;
+            var marginThreshold = 120;
             if (w < dw + marginThreshold || h < dh + marginThreshold) {
 
                 var wr = (dw + marginThreshold) / w;
-                var hr = (dh + marginThreshold) / h;
+                var hr = (dh + marginThreshold + 50) / h;
 
                 if (hr > wr) {
                     scale = 1 / hr;
@@ -217,15 +182,15 @@ app.intro = kendo.observable({
 
                 console.log(wr + " " + hr)
 
-                $(".credits-container").css("transform", "scale(" + scale + ") ")
+               // $(".credits-container").css("transform", "scale(" + scale + ") ")
 
             }
 
             var ml = -($(".credits-container").width()) / 2;
             var mt = (h - $(".credits-container").height()) / 2 + (topOffset * scale);
-            $(".credits-container").css("top", mt + "px");
-            $(".card-wrapper").css("left", "50%");
-            $(".credits-container").css("margin-left", ml + "px");
+           // $(".credits-container").css("top", mt + "px");
+           // $(".card-wrapper").css("left", "50%");
+            //$(".credits-container").css("margin-left", ml-25 + "px");
             $(".credits-container").fadeIn();
             gamePlay.renderRedButtons();
 
@@ -240,7 +205,7 @@ app.intro = kendo.observable({
           
 
             $(".close-imgcredits").on("click touchend", function () {
-                $(".card-wrapper").remove();
+                $(".credits-container").remove();
             });
 
         }, 0);

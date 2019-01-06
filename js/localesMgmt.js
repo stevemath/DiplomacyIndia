@@ -101,7 +101,7 @@ var localesMgmt = {
                 sqr.top = targObj.top + sqW;
                // sqr.rr = "low";
                    sqr.state = "ready";
-                    sqr.setGradient('fill', disGradientReady)
+                    sqr.setGradient('fill', dipGradientReady)
                     sqr.unlockable = targObj.unlockable;
 
 
@@ -134,7 +134,7 @@ var localesMgmt = {
 
         //  locales = vmLocales.locales;
 
-        console.log(locales)
+       // console.log(locales)
 
         var cRadius = 15;
         var triH = 30;
@@ -155,7 +155,7 @@ var localesMgmt = {
             item.x = parseInt(item.x);
             item.y = parseInt(item.y);
             
-            console.log(item);
+          //  console.log(item);
             var opacity = 0;
             var calState = "hide";
             if (item.state == "calendar") {
@@ -185,17 +185,36 @@ var localesMgmt = {
            
             //'#effa6e'
             if (item.aType == "dis") {
-                var circle = new fabric.Circle({
-                    id: item.Id, radius: cRadius, shadow: shadow, left: item.x - cRadius, top: item.y - cRadius
+                //var circle = new fabric.Circle({
+                //    id: item.Id, radius: cRadius, shadow: shadow, left: item.x - cRadius, top: item.y - cRadius
+                //});
+
+                //circle.setGradient('fill', disGradientLocked)
+                //circle.set("stroke", "#202020");
+                //circle.set("strokeWidth", 3);
+                //canvas.add(circle);
+                //circle.bringToFront();
+                //circle.moveTo(10);
+
+                //circle.hasControls = false;
+                //circle.hasBorders = false;
+                //circle.hoverCursor = "pointer";
+                //circle.lockMovementX = true;
+                //circle.lockMovementY = true;
+                //circle.state = item.state;
+                //circle.initState = item.state;
+                //circle.aType = item.aType;
+                //circle.name = item.name;
+                //circle.originX = "center";
+                //circle.originY = "center";
+
+                var circle = new fabric.Rect({
+                    id: item.Id, width: sqW, height: sqW, shadow: shadow, stroke: "black", strokeWidth: 3, left: item.x, top: item.y 
                 });
 
-                circle.setGradient('fill', disGradientLocked)
-                circle.set("stroke", "#202020");
-                circle.set("strokeWidth", 3);
                 canvas.add(circle);
                 circle.bringToFront();
                 circle.moveTo(10);
-
                 circle.hasControls = false;
                 circle.hasBorders = false;
                 circle.hoverCursor = "pointer";
@@ -204,14 +223,21 @@ var localesMgmt = {
                 circle.state = item.state;
                 circle.initState = item.state;
                 circle.aType = item.aType;
-                circle.name = item.name;
                 circle.originX = "center";
                 circle.originY = "center";
+
+                circle.centeredRotation = true;
+                circle.angle = 45;
+
+                circle.rr = "low";
+               
+
+
 
                 if (item.state == "ready" || calState == "show") {
                     // console.log("circle state: " + item.state)
                     //circle.set("fill", "#ff9900");
-                    circle.setGradient('fill', disGradientReady)
+                    circle.setGradient('fill', dipGradientReady)
                     circle.state = "ready";
                 }
 
@@ -289,36 +315,70 @@ var localesMgmt = {
                    // if (item.rr == "low") {
                         // console.log(item.x);
 
-                        var sqr1 = new fabric.Rect({
-                            id: item.Id, width: sqW, height: sqW, shadow: shadow, stroke: "black", strokeWidth: 3, left: item.x, top: item.y - sqW / 2
-                        });
-                sqW = sqW / 2;
-                var sqr = new fabric.Circle({
-                    id: item.Id, radius: cRadius, shadow: shadow, left: item.x - cRadius, top: item.y - cRadius, stroke: "black", strokeWidth: 3
+                //        var sqr = new fabric.Rect({
+                //            id: item.Id, width: sqW, height: sqW, shadow: shadow, stroke: "black", strokeWidth: 3, left: item.x, top: item.y - sqW / 2
+                //        });
+                //sqW = sqW / 2;
+                //var sqr0 = new fabric.Circle({
+                //    id: item.Id, radius: cRadius, shadow: shadow, left: item.x - cRadius, top: item.y - cRadius, stroke: "black", strokeWidth: 3
+                //});
+
+                //        canvas.add(sqr);
+                //        sqr.bringToFront();
+                //        sqr.moveTo(10);
+                //        sqr.hasControls = false;
+                //        sqr.hasBorders = false;
+                //        sqr.hoverCursor = "pointer";
+                //        sqr.lockMovementX = true;
+                //        sqr.lockMovementY = true;
+                //        sqr.state = item.state;
+                //        sqr.initState = item.state;
+                //        sqr.aType = item.aType;
+                //        sqr.originX = "center";
+                //        sqr.originY = "center";
+
+                //        sqr.centeredRotation = true;
+                //        sqr.angle = 45;
+
+                //       // sqr.rr = "low";
+                //        if (item.state == "ready" || calState == "show") {
+                //            sqr.state = "ready";
+                //            sqr.setGradient('fill', dipGradientReady)
+                //        }
+
+
+
+
+                var sqr = new fabric.Rect({
+                    id: item.Id, width: sqW, height: sqW, shadow: shadow, stroke: "black", strokeWidth: 3, left: item.x, top: item.y 
                 });
 
-                        canvas.add(sqr);
-                        sqr.bringToFront();
-                        sqr.moveTo(10);
-                        sqr.hasControls = false;
-                        sqr.hasBorders = false;
-                        sqr.hoverCursor = "pointer";
-                        sqr.lockMovementX = true;
-                        sqr.lockMovementY = true;
-                        sqr.state = item.state;
-                        sqr.initState = item.state;
-                        sqr.aType = item.aType;
-                        sqr.originX = "center";
-                        sqr.originY = "center";
+                canvas.add(sqr);
+                sqr.bringToFront();
+                sqr.moveTo(10);
+                sqr.hasControls = false;
+                sqr.hasBorders = false;
+                sqr.hoverCursor = "pointer";
+                sqr.lockMovementX = true;
+                sqr.lockMovementY = true;
+                sqr.state = item.state;
+                sqr.initState = item.state;
+                sqr.aType = item.aType;
+                sqr.originX = "center";
+                sqr.originY = "center";
 
-                        sqr.centeredRotation = true;
-                        sqr.angle = 45;
+                sqr.centeredRotation = true;
+                sqr.angle = 45;
 
-                       // sqr.rr = "low";
-                        if (item.state == "ready" || calState == "show") {
-                            sqr.state = "ready";
-                            sqr.setGradient('fill', disGradientReady)
-                        }
+                sqr.rr = "low";
+                if (item.state == "ready" || calState == "show") {
+                    sqr.state = "ready";
+                    sqr.setGradient('fill', dipGradientReady)
+                }
+
+
+
+
                         //else {
 
                         if (item.state == "calendar" || item.state == "random") {
@@ -357,7 +417,7 @@ var localesMgmt = {
             console.log("resize: " + nd);
             setTimeout(function () {
                 self.updateLocalesStates();
-                gamePlay.showMessage(0);
+               // gamePlay.showMessage(0);
         }, 500);
 
 
@@ -752,8 +812,8 @@ var localesMgmt = {
          //   window.fabric.util.addListener(canvas.upperCanvasEl, 'touchend', function (event, self) {
              window.mousedown = false;
              console.log("obj click registered");
-            
-                fadeAudio(currentAudio);
+             gamePlay.checkForPopup();
+               fadeAudio(currentAudio);
                 var target = canvas.findTarget(event);
          
             //  console.log("canvas click")
@@ -764,11 +824,26 @@ var localesMgmt = {
 
                 var openWindows = false;
 
-                if ($(".card-wrapper").length > 0 || configData.gameData.popupsExecuting == true) {
-                    openWindows = true
-                }
+             if ($(".card-wrapper").length > 0 || configData.gameData.popupsExecuting == true) {
 
-                if(target.id && openWindows == false){
+                
+                 console.log(configData.gameData.popupsExecuting == true);
+                 openWindows = true;
+             } else {
+                 openWindows = false;
+             }
+
+
+             console.log(target);
+             console.log(openWindows);
+             console.log("gameplaylocked is : " + gamePlay.properties.locked);
+
+             if (target.id && openWindows == false && gamePlay.properties.locked == false) {
+
+               
+
+               
+
                 // save bush card
                 $(".save-card").trigger("click");
 
@@ -779,7 +854,7 @@ var localesMgmt = {
                 var id = target.id;
 
                 // get item data
-
+                    console.log(id);
                 if (id != undefined) {
 
                     var item = getLocaleById(id)
@@ -794,8 +869,11 @@ var localesMgmt = {
 
                     //}
                     var obj = selectObject(id);
-
+                    console.log(obj);
                     if (obj != null && obj.opacity == 1) {
+
+                        gamePlay.properties.locked = true;
+
                         console.log(item);
                         if (item != null && item.aType == 'dip' && (item.state == "ready" || item.state == "calendar" || item.state == "random") && item.contentId != "") {
                             if (item && item.hasOwnProperty("unlocks")) {
@@ -980,6 +1058,7 @@ var localesMgmt = {
         $(".getbcardfull").off();
         $(".getbcardfull").on("click touchend", function () {
             if ($(".card-wrapper").length == 0) {
+                $(".getbcardfull").off();
                 gamePlay.getBcardLayout();
             }
         });
@@ -1036,7 +1115,9 @@ var localesMgmt = {
             openWindows = true
         }
 
-        if (target.id && openWindows == false) {
+        console.log("game is : " + gamePlay.properties.locked);
+
+        if (target.id && openWindows == false ) {
             // save bush card
             $(".save-card").trigger("click");
 
@@ -1099,8 +1180,8 @@ var localesMgmt = {
     console.log(dir + file);
     newImg.off();
     newImg.on("load", function () {
-        var h =766// newImg.height();
-        var w = 1280//newImg.width();
+        var h = 762//1197//766// newImg.height();
+        var w = 1280//2000//1280//newImg.width();
        // 1280x766
         imgW = w;
         imgH = h;
@@ -1345,9 +1426,9 @@ var localesMgmt = {
                                 var locText = selectObject(item.Id + "-state");
                                 // loc.set("fill", "#ff9900");
                                 if (item.aType == "dip") {
-                                    loc.setGradient("fill", disGradientReady);
+                                    loc.setGradient("fill", dipGradientReady);
                                 } else {
-                                    loc.setGradient("fill", disGradientReady);
+                                    loc.setGradient("fill", dipGradientReady);
                                     loc.discResult = "used";
                                   
                                 }
@@ -1377,7 +1458,7 @@ var localesMgmt = {
 
                                     loc.opacity = 0;
 
-                                }, 1000)
+                                }, 3000)
                             }
 
                             setTimeout(function () {
@@ -1388,7 +1469,7 @@ var localesMgmt = {
                                 // canvas.renderAll();
 
                                 // console.log(canvas.getObjects());
-                            }, 1500);
+                            }, 3000);
                         }
                     })
 
@@ -1409,7 +1490,8 @@ var localesMgmt = {
                         });
                         self.removeGlow(src)
                         canvas.renderAll()
-                    }, 300);
+                        gamePlay.properties.locked = false;
+                    }, 2000);
                     canvas.renderAll();
                 } else {
 
@@ -1455,13 +1537,14 @@ var localesMgmt = {
                             });
                             self.removeGlow(src)
                             canvas.renderAll()
+                            gamePlay.properties.locked = false;
                         }, 300);
 
                     } else {
 
  setTimeout(function () {
 
-                        src.setGradient('fill', disGradientReady);
+                        src.setGradient('fill', dipGradientReady);
                         //  src.stroke = "#000000"
                         console.log("reset locale");
 
@@ -1511,15 +1594,15 @@ var localesMgmt = {
         var pts = configData.gameData.expLevel;
         var arrLevels = configData.dsExp.ds.data().toJSON();
         var currLevel = configData.gameData.currExpLevel;
-        var newLevel = 0;
+        var newLevel = -1;
         $.each(arrLevels, function (i, item) {
-            console.log(item.threshold + " " + pts);
+           // console.log(item.threshold + " " + pts);
             if (item.threshold <= pts) {
                 newLevel = item.idx;
             }
         })
 
-        if (newLevel > currLevel) {
+        if (newLevel >= currLevel) {
 
             console.log("show exp locales");
             configData.gameData.currExpLevel = newLevel;
@@ -1557,7 +1640,7 @@ var localesMgmt = {
                      obj.opacity = 1;
                      obj.state = "ready";
                      if (obj.aType == "dip") {
-                         obj.setGradient('fill', disGradientReady);
+                         obj.setGradient('fill', dipGradientReady);
                      }
 
                     
@@ -1568,7 +1651,7 @@ var localesMgmt = {
 
 
                          if (obj.aType == "dis") {
-                             obj.setGradient('fill', disGradientReady);
+                             obj.setGradient('fill', dipGradientReady);
                          }
                          item.discResult = "ready";
                      }
@@ -1601,16 +1684,19 @@ var localesMgmt = {
                 
                  // 
                  // console.log(item);
-                 console.log(obj);
-                 console.log(self.showExpLocales + " " + obj.expLevel + " " +  configData.gameData.currExpLevel );
-                 if (self.showExpLocales == true && obj.expLevel && configData.gameData.currExpLevel == obj.expLevel && obj.state != "ready" && obj.state != "empty") {
+                // console.log(obj);
+               //  console.log(self.showExpLocales + " " + obj.expLevel + " " + configData.gameData.currExpLevel);
+
+                 //self.showExpLocales == true &&
+                 if ( obj.expLevel && configData.gameData.currExpLevel >= obj.expLevel && obj.state != "ready" && obj.state != "empty") {
 
                      self.showExpLocales = false;
                      console.log("reveal exp");
                      obj.opacity = 1;
                      obj.state = "ready";
+                     item.state = "ready";
                      if (obj.aType == "dip") {
-                         obj.setGradient('fill', disGradientReady);
+                         obj.setGradient('fill', dipGradientReady);
                      }
 
 
@@ -1621,13 +1707,15 @@ var localesMgmt = {
 
 
                          if (obj.aType == "dis") {
-                             obj.setGradient('fill', disGradientReady);
+                             obj.setGradient('fill', dipGradientReady);
                          }
                          item.discResult = "ready";
                      }
                      //item.state = "ready";
                      // console.log("show");
                      //console.log(item.name)
+
+                     console.log(obj);
                  } else {
 
 
@@ -1668,18 +1756,19 @@ var localesMgmt = {
 
          if (extraDip > 0) {
              for (var i = 0; i < extraDip; i++) {
-                 var item = configData.gameData.UsedRandomDip.at(i);
-                 var obj = selectObject(item.Id);
-                 locItem = getLocaleById(item.Id);
-                 if (!locItem.diploResult || (locItem.diploResult != 1 && locItem.diploResult != 0)) {
-                     locItem.diploResult = "retired";
+                 if (configData.gameData.UsedRandomDip != undefined) {
+                     var item = configData.gameData.UsedRandomDip.at(i);
+                     var obj = selectObject(item.Id);
+                     locItem = getLocaleById(item.Id);
+                     if (!locItem.diploResult || (locItem.diploResult != 1 && locItem.diploResult != 0)) {
+                         locItem.diploResult = "retired";
+                     }
+                     obj.opacity = 0;
+                     obj.state = "locked";
+                     self.removeGlow(obj);
+                     configData.gameData.removeUsedRandomDip(item);
+                     configData.gameData.addRandomDip(item);
                  }
-                 obj.opacity = 0;
-                 obj.state = "locked";
-                 self.removeGlow(obj);
-                 configData.gameData.removeUsedRandomDip(item);
-                 configData.gameData.addRandomDip(item);
-
              }
 
          }
@@ -1742,7 +1831,7 @@ var localesMgmt = {
                              locItem = getLocaleById(item.Id);
                              locItem.diploResult = "ready";
 
-                             obj.setGradient('fill', disGradientReady);
+                             obj.setGradient('fill', dipGradientReady);
                              self.createGlow(obj);
                              // console.log(item);
 
@@ -1797,7 +1886,7 @@ var localesMgmt = {
                          obj.opacity = 1;
                          obj.state = "ready";
 
-                         obj.setGradient('fill', disGradientReady);
+                         obj.setGradient('fill', dipGradientReady);
                          console.log("dis - create glow")
                          self.createGlow(obj);
 
@@ -1820,11 +1909,46 @@ var localesMgmt = {
 
              });
          }
+
+
+        
+    
+
      }, 800);
 
 
      canvas.renderAll();
-    
+// chk for all locales complete
+     setTimeout(function () {
+         var readyLocales = 0;
+
+         $.each(locales, function (idx, item) {
+            // console.log(item);
+             var obj = selectObject(item.Id);
+            // console.log(obj);
+             if (obj.opacity === 1) {
+                 readyLocales++;
+             }
+         })
+         console.log(readyLocales);
+         if (readyLocales == 0 && configData.dsItinerary.ds.data().length < itinSlots) {
+
+             if (configData.gameData.popupEvents.length == 0) {
+                 console.log("add and show");
+                 gamePlay.addPopupEvent('gamePlay.usedAllLocales');
+                 self.checkForPopup();
+             } else {
+                 console.log("add only");
+                 gamePlay.addPopupEvent('gamePlay.usedAllLocales');
+             }
+            
+            
+         }
+
+     },3200)
+     
+
+
  },
  removeGlow(obj) {
      if (isMobile == false) {
@@ -1929,7 +2053,8 @@ canvas.clear();
 canvas.dispose();
 locales = [];
 configData.gameData.set("savedBushCards", null);
-configData.gameData.set("savedCardsNum", 0);
+     configData.gameData.set("savedCardsNum", 0);
+     configData.gameData.set("unlockedScrapPages", 1);
 
 $("#cardsList").remove();
 $("#bcardLayout").remove();

@@ -6,13 +6,18 @@
         selectedFact: null,
         gameStarted: false,
         lastFactIdx: null,
+        itinH: 450,
+        itinTop: 0,
+        itinExpanded: true,
+        itinState: "itin",
+       locked:false,
        // savedBushCards:null,
     },
     init: function () {
         var self = this;
         console.log("init game")
-     
-
+        self.setupNotification();
+        
 
 
         $(document).on('touchmove', function (ev) {
@@ -22,20 +27,69 @@
             }
         })
 
+        //self.initBCard();
 
-
-
+       // self.gameOverPrompt();
         // set up itin handling
         console.log($("#itin").length);
         configData.dsItinerary.getDataSource();
         configData.dsViewedLocales.getDataSource();
 
-        $("#itin").kendoMobileListView({
+        var itinList = $("#itin").kendoMobileListView({
             dataSource: configData.dsItinerary.ds,
             template: $("#itinTemplate").html(),
-           // appendOnRefresh: true,
-            autoBind:true,
-        })
+            // appendOnRefresh: true,
+            autoBind: true,
+            dataBound: function () {
+                gamePlay.renderStars();
+                gamePlay.renderRedButtons();
+                gamePlay.addSpacers();
+               // console.log(itinSlots);
+                //console.log(configData.dsItinerary.ds.data().length);
+              
+                setTimeout(function () {
+                    if ($("#gameoverLayout").length == 0) {
+                   // fadeAudio(currentAudio);
+                    }
+                   
+                }, 1500)
+
+                if (configData.dsItinerary.ds.data().length >= itinSlots) {
+                    console.log("game over");
+                    //gamePlay.gameOverPrompt();
+                  
+
+                    $(".submit-wrapper").show();
+                    setTimeout(function () {
+
+                        if (configData.gameData.popupEvents.length == 0 && self.checkOpenPopups() == false) {
+                            console.log("add and show");
+                            self.addPopupEvent('gamePlay.gameOverPrompt');
+                            self.checkForPopup();
+                        } else {
+                            console.log("add only");
+                            self.addPopupEvent('gamePlay.gameOverPrompt');
+                        }
+
+                    }, 450)
+                   
+                    
+                } else {
+                    $(".submit-wrapper").hide();
+                }
+                setTimeout(function () {
+                    if ($(window).width() < 1250) {
+                        $("#itinerary").css("top", "1%");
+                       // $("#itinerary").css("right", "1%");
+                       
+                    }
+                }, 50);
+                         
+            }
+        }).data("kendoMobileListView");
+
+        //itinList.dataSource.insert({})
+       
 
 
         $("#viewedLocations").kendoMobileListView({
@@ -43,51 +97,155 @@
             template: $("#viewedLocalesTemplate").html(),
             // appendOnRefresh: true,
             autoBind: true,
+
+            dataBound: function () {
+                gamePlay.renderStars();
+                var totalPages = configData.dsViewedLocales.ds.totalPages();
+                var currPg = configData.dsViewedLocales.ds.page();
+
+                console.log(currPg);
+                if (currPg > 1) {
+                    $(".viewed-advance.back").show();
+                } else {
+                    $(".viewed-advance.back").hide();
+
+                }
+
+                if (currPg < totalPages) {
+                    $(".viewed-advance.forward").show();
+                } else {
+                    $(".viewed-advance.forward").hide();
+
+                }
+
+            },
         })
 
 
+        $(".viewed-advance.forward").on("click", function () {
+            var currPg = configData.dsViewedLocales.ds.page();
+            var newPg = currPg + 1;
+            configData.dsViewedLocales.ds.page(newPg)
 
-       
-       
-        $("#itinerary").kendoDraggable({
 
+
+        })
+
+             $(".viewed-advance.back").on("click", function () {
+
+                 var currPg = configData.dsViewedLocales.ds.page();
+                 var newPg = currPg - 1;
+                 configData.dsViewedLocales.ds.page(newPg)
+
+
+            })
+
+        //$("#itinerary").on("mousedown, touchstart", function(){
+
+        //    console.log("itinerary");
+        //    self.properties.readyToDrag = true;
+        //})
+
+        //$("#itinerary").on("mouseup, touchend", function () {
+
+        //    self.properties.readyToDrag = false;
+        //})
+
+
+        var strMatrix = $("#itinerary").css("transform");
+                var matrix = strMatrix.split(',');
+                var scale = matrix[3];
+      var dragItin=  $("#itinerary").kendoDraggable({
+           
             holdToDrag: false,
             hold: function (e) {
-                $("#itinerary").css("border", "solid 6px #339966")
+                $("#itin-panels").css("border", "solid 3px #ddc82c")
                 console.log("hold");
             },
+           
             dragstart: function (e) {
-                $(e.sender.hint).css("border", "solid 6px #339966")
-                console.log(e);
-                $(e.currentTarget).hide();
+
+               // if (self.properties.readyToDrag == true) {
+                    console.log("itin draggable");
+                    $(e.sender.hint).find("#itin-panels").css("border", "solid 3px #ddc82c");
+                    // $(e.sender.hint).css("border-radius", "10px");
+                    var h = $("#itinerary").height();
+                  // $(e.sender.hint).css("height", h + "px")
+                    console.log(e);
+                    $(e.currentTarget).hide();
+                //} else {
+                //    e.preventDefault();
+                   
+                //}
                // $(e.sender).hide();
             },
+           // cursorOffset : { top: -200, left: -310 },
             hint: function (element) {
-               
-                return element.clone();
+                var hintEl = element.clone();
+               // hintEl.attr("id","hintEl")
+                hintEl.addClass("hint-el")
+               // hintEl.css({ marginLeft: "-217px", marginTop: "-140px" });
+                return hintEl;
+                    //.css({ marginLeft: "-217px", marginTop: "-140px" });
             },
             dragend: function (e) {
-                var iY = e.sender.hint.offset().top;
+                var iY = e.sender.hint.offset().top; // -($(e.currentTarget).height() * scale);
                 var iX = e.sender.hint.offset().left;
+                console.log(iY + "  " + iX);
+                console.log($(".hint-el")[0].getBoundingClientRect());
+                console.log($(e.currentTarget)[0].getBoundingClientRect());
+                console.log($(e.currentTarget).offset());
+               // console.log(document.getElementById("hintEl").getBoundingClientRect());
+                    //- ($(e.currentTarget).width() * scale);
+                    ;//- 108;// ($(e.currentTarget).width() * .35);
                 //e.x.client
+                //$(e.currentTarget).css("top", iY + "px");
+                //$(e.currentTarget).css("left", iX + "px");
+
                 $(e.currentTarget).css("top", iY + "px");
-                $(e.currentTarget).css("left", iX + "px");
-                console.log(e);
+              $(e.currentTarget).css("left", iX + "px");
+              // $(e.currentTarget).css("transform", "translateX(5px)"));
+                $(e.currentTarget).css("bottom","auto")
+               // console.log(e);
                 e.sender.hint.remove();
-                $("#itinerary").css("border", "solid 6px transparent")
+                $("#itin-panels").css("border", "solid 2px #000")
+              //  $("#itinerary").css("height", "auto")
                 $(e.currentTarget).show();
+                self.properties.readyToDrag = false;
             },
+           // container: $(".km-content"),
+          container: $('.itinerary-wrapper'),
+        }).data("kendoDraggable");
 
+       // dragItin.container = $(".km-content");
+        var winW = $(window).width();
+        var winH = $(window).height();
+        if (winW <= 1024 && winW >750) {
+          //  $('.itinerary-wrapper').css("width", "158%");
+            $('.itinerary-wrapper').css("width", "135%")
+        $('.itinerary-wrapper').css("height", "135%")
+            //$("#itinerary").offset({ top: winW / 2, left: winH / 2 })
+           // $("#itinerary").offset({ top: 0, left: 950 })
 
+            $("#itinerary").css("left","55%")
         }
-        );
 
+        if (winW <= 750) {
+            //$('.itinerary-wrapper').css("width", "122%")
+            //$('.itinerary-wrapper').css("height", "120%")
 
+            $('.itinerary-wrapper').css("width", "165%")
+            $('.itinerary-wrapper').css("height", "175%")
+            $("#itinerary").css("left", "40%")
+        }
+       
         $(".show-visited").on("click", function () {
             $(".itin-wrapper").hide();
             $(".viewed-locales-wrapper").show();
             var buttongroup = $("#btnGroup").data("kendoMobileButtonGroup");
             buttongroup.select(1);
+            $(".head-left").text("Visited");
+            $(".head-rt").text("Sites");
 
         })
 
@@ -96,9 +254,52 @@
             $(".viewed-locales-wrapper").hide();
             var buttongroup = $("#btnGroup").data("kendoMobileButtonGroup");
             buttongroup.select(0);
+            $(".head-left").text("Presidential");
+            $(".head-rt").text("Itinerary");
         })
 
-      
+
+        $(".submit-itin").on("click", function () {
+
+           // self.gameOverPrompt();
+
+             if (configData.gameData.popupEvents.length == 0 && self.checkOpenPopups() == false) {
+                            console.log("add and show");
+                            self.addPopupEvent('gamePlay.gameOverPrompt');
+                            self.checkForPopup();
+                        } else {
+                            console.log("add only");
+                            self.addPopupEvent('gamePlay.gameOverPrompt');
+                        }
+
+        })
+
+        $(".scrapbook").on("click", function () {
+            self.getScrapbook();
+        })
+
+        $(".btn-expand").on("click", function () {
+            console.log(self.properties.itinExpanded);
+            if (self.properties.itinExpanded == true) {
+                self.collapseItin();
+            } else {
+                self.expandItin();
+            }
+            
+        });
+
+
+        $(".itin-header").kendoTouch({
+            doubletap: function (e) {
+                console.log("dbl tap");
+                if (self.properties.itinExpanded == true) {
+                    self.collapseItin();
+                } else {
+                    self.expandItin();
+                }
+            },
+           
+        });
 
         var buttongroup = $("#btnGroup").data("kendoMobileButtonGroup");
         buttongroup.select(0);
@@ -150,7 +351,7 @@
              configData.dsDiscovery.getDataSource();
              configData.dsBushCards.getDataSource();
              configData.dsMulti.getDataSource();
-             configData.dsAchievements.getDataSource();
+            // configData.dsAchievements.getDataSource();
             localesMgmt.getImgDim(imgDir, bkgrdImg);
             configData.dsItinerary.getDataSource();
             configData.dsExp.getDataSource();
@@ -200,6 +401,37 @@
         }
 
       
+    },
+    setupNotification: function () {
+
+        var self = this;
+
+        notification = function (mssg) {
+
+           var templateContent = $("#notificationTemplate").html();
+            var template = kendo.template(templateContent);
+            var result = kendo.render(template, [{message:mssg}]);
+            $("body").append(result);
+           self.renderRedButtons();
+            $(".close-notification").on("click", function () { $(".notification-container").remove()})
+
+        }
+
+    },
+    addSpacers: function () {
+
+        var data = $("#itin").data("kendoMobileListView").dataSource.data().toJSON();
+        var itemHTML = "<li><div class='itin-item' ></div></li>";
+
+        if (data.length < itinSlots) {
+
+            var newSlots = itinSlots - data.length;
+            for (var i = 0; i < newSlots; i++) {
+                $("#itin").append(itemHTML)
+
+            }
+        }
+
     },
     getItinPanel: function(e) {
             var index = this.current().index();
@@ -318,11 +550,13 @@
              configData.dsDiplomacy.ds.filter({ field: "Id", operator: "eq", value: id });
              var dv = configData.dsDiplomacy.ds.view()[0].toJSON();
               var quiz = self.getRandomQuiz();
-             // console.log(quiz);
+              console.log(quiz);
              // console.log(dv);
-        if (quiz != null) {
+        if (quiz != null && quiz.answers) {
             dv.q = quiz.q;
             dv.answers = quiz.answers;
+            console.log(quiz);
+            console.log(dv);
             shuffle(dv.answers)
             console.log(dv.answers);
             dv.factId = quiz.factId.Id;
@@ -340,6 +574,7 @@
         var dv = configData.dsDiscovery.ds.view()[0].toJSON();
         console.log(dv);
         var fact = self.getRandomFact(id);
+       
         if (fact != null) {
             dv.fact = fact.fact;
 
@@ -423,34 +658,39 @@ var dw = $(".diplomacy-container").width();
 var dh = $(".diplomacy-container").height();
 var topOffset = 95;
  var scale =1;
-        //  console.log(w + " " + h + " " + dw + " " + dh)
+          console.log(w + " " + h + " " + dw + " " + dh)
  var marginThreshold = 295;
- if (w < dw + marginThreshold || h < dh + marginThreshold) {
 
-     var wr = (dw + marginThreshold) / w;
-     var hr = (dh + marginThreshold) / h;
-   
-    if (hr > wr) {
-        scale = 1 / hr;
-    } else {
-        scale = 1 / wr;
-    }
 
-    console.log(wr + " " + hr)
-               
-    $(".diplomacy-container").css("transform", "scale(" + scale + ") ")
-    //setTimeout(function () { 
-    //    var ml = -(w - $(".diplomacy-container").width()) / 2;
-    //    var mt = (h - $(".diplomacy-container").height()) / 2 ;
-    //    // $(".diplomacy-container").css("top", mt + "px");
-    //    //$(".diplomacy-container").css("left", ml + "px");
-    //    // $(".diplomacy-container").css("margin-left", ml + "px");
-    //},300)
-}
 
-var ml = -($(".diplomacy-container").width()) / 2;
-var mt = (h - $(".diplomacy-container").height()) / 2 + (95*scale);
-$(".diplomacy-container").css("top", mt + "px");
+        if (w < dw + 170 || h < dh + 170) {
+
+            var wr = (dw + 220) / w;
+            var hr = (dh + 220) / h;
+            var scale;
+            if (hr > wr) {
+                scale = 1 / hr;
+            } else {
+                scale = 1 / wr;
+            }
+
+            console.log(scale)
+
+            $(".diplomacy-container").css("transform", "scale(" + scale + ") ")
+            setTimeout(function () {
+                var ml = -(w - $(".diplomacy-container").width()) / 2 - 40;
+                var mt = (h - $(".diplomacy-container").height()) / 2 - 40;
+
+            }, 300)
+        }
+
+
+var ml = -($(".diplomacy-container").width()) / 2 -40;
+//var mt = (h - $(".diplomacy-container").height()) / 2 + (95*scale) -40;
+//$(".diplomacy-container").css("top", mt + "px");
+
+        var mt = (h - $(".diplomacy-container").height()) / 2 - 40;
+        $(".diplomacy-container").css("top", mt + "px");
 $(".card-wrapper").css("left", "50%");
 $(".diplomacy-container").css("margin-left", ml + "px");
 $(".diplomacy-container").fadeIn();
@@ -460,13 +700,13 @@ $(".diplomacy-container").fadeIn();
 
 
           
-$(".cancel").on("click touchend", function () {
+        $(".cancel").on("click touchend", function () {
+            gamePlay.properties.locked = false;
     fadeAudio(currentAudio);
     $(".diplomacy-container").fadeOut(200, function () {
        // $(".diplomacy-container").remove();
         $(".card-wrapper").remove();
     });
-
    
     //var locale = getLocaleById(src);
    
@@ -493,9 +733,11 @@ $(".cancel").on("click touchend", function () {
 
 $(".accept").on("click touchend", function (e) {
     console.log("accept");
-    configData.gameData.careerList.push(diploData.name);
-    configData.gameData.set("activityNum", configData.gameData.careerList.length);
-    console.log(configData.gameData.activityNum);
+   
+
+    // configData.gameData.careerList.push(diploData.name);
+    //configData.gameData.set("activityNum", configData.gameData.careerList.length);
+    //console.log(configData.gameData.activityNum);
    // console.log($(e.target).data().factid);
    
    // kendo.fx($(".diplomacy-container")).flip("horizontal", $(".dip-front"), $(".dip-back")).duration(1000).play();
@@ -511,8 +753,10 @@ $(".accept").on("click touchend", function (e) {
     var templateAContent;
     if (templateType == "random") {
         templateAContent = $("#diplomacyActionRandomTemplate").html();
+        
     } else {
-        templateAContent  = $("#diplomacyActionTemplate").html();
+        templateAContent = $("#diplomacyActionTemplate").html();
+       
     }
     
     var templateA = kendo.template(templateAContent);
@@ -524,16 +768,27 @@ $(".accept").on("click touchend", function (e) {
     $("body").prepend(resultA);
     self.renderRedButtons();
 
-    $(".dip-btn").on("click touchend", function (e) {
+    if (templateType == "random") {
+        $(".card-content .continue").show();
+    } else {
+
+        $(".card-content .continue").hide();
+    }
+
+    setTimeout(function () {
+ $(".dip-btn").on("click touchend", function (e) {
         console.log("answer click");
         //self.evalDipResp(e, diploPts, exPts, diploData.risk.id)
         self.evalDipResp(e, diploPts, exPts)
     });
 
+    },350)
+   
+
 
     $(".continue").off();
-    $(".resp-wrapper .continue").on("click touchend", function () {
-
+    $(".card-content .continue").on("click touchend", function () {
+        $(".card-content .continue").remove();
         var itinExists = configData.dsItinerary.ds.get(diploData.Id)
         if (itinExists) {
             $(".resp-container").fadeOut(200, function () {
@@ -550,25 +805,25 @@ $(".accept").on("click touchend", function (e) {
 
     var itinItem = diploData;
     $(".itin-btns .itin-yes").on("click touchend", function () {
-
+        playAudio(audioList.itinerary);
         updateLocale(true);
         console.log("close diplo");
-        $("#resultsScrim").remove();
-        $("#fireworksiframe").remove();
+      //  $("#resultsScrim").remove();
+        //$("#fireworksiframe").remove();
 
         $(".diplomacy-container").fadeOut(200, function () {
             $(".card-wrapper").remove();
             // $(".diplomacy-container").remove();
-            $("#resultsScrim").remove();
-            $("#fireworksiframe").remove();
+           // $("#resultsScrim").remove();
+            //$("#fireworksiframe").remove();
             self.checkForPopup();
         });
 
         $(".dis-fact").fadeOut(200, function () {
             $(".card-wrapper").remove();
             // $(".diplomacy-container").remove();
-            $("#resultsScrim").remove();
-            $("#fireworksiframe").remove();
+           // $("#resultsScrim").remove();
+            //$("#fireworksiframe").remove();
             self.checkForPopup();
         });
 
@@ -602,7 +857,7 @@ $(".accept").on("click touchend", function (e) {
 
         var expPts = parseInt(exPts);
         console.log(currRespStatus);
-
+        console.log(expPts);
         if (currRespStatus == 1) {
             //self.adjustDipMeter(pts);
 
@@ -623,7 +878,7 @@ $(".accept").on("click touchend", function (e) {
 
             configData.gameData.adjustRank(expPts);
 
-            self.checkAchievements(diploData.achievementId);
+           // self.checkAchievements(diploData.achievementId);
 
             configData.gameData.adjustDipLevel(pts);
 
@@ -638,10 +893,21 @@ $(".accept").on("click touchend", function (e) {
         dipItem.diploResult = currRespStatus;
 
         if (addToItin == true) {
-            var dup = configData.dsItinerary.ds.get(itinItem.Id)
+            var dup = configData.dsItinerary.ds.get(itinItem.Id);
+            var totalItin = configData.dsItinerary.ds.data().length;
+
             if (dup == undefined) {
-                configData.dsItinerary.ds.add(itinItem);
+               // configData.dsItinerary.ds.add(itinItem);
+
+                self.addItinItemFromDialog(itinItem)
+
+                if (totalItin >= itinSlots) {
+                    console.log("auto add to viewed list");
+                    configData.dsViewedLocales.ds.add(itinItem)
+                }
             }
+
+           
         }
     }
 
@@ -723,7 +989,7 @@ $(".accept").on("click touchend", function (e) {
              }
 
              self.evalRandom(correct);
-            self.showResults(correct,diploData.experiencePoints,diploData.points)
+          //  self.showResults(correct,diploData.experiencePoints,diploData.points)
 
         }, 2000);
 
@@ -748,206 +1014,227 @@ $(".accept").on("click touchend", function (e) {
 
 
     },
-    showLevelUp: function (newLevel) {
-        var self = this;
-        setTimeout(function () {
-            console.log("show levelup");
+    //showLevelUp: function (newLevel) {
+    //    var self = this;
+    //    setTimeout(function () {
+    //        console.log("show levelup");
 
-            playAudio(audioList.levelUp);
-            if (newLevel == undefined) { newLevel = 1 };
+    //        playAudio(audioList.levelUp);
+    //        if (newLevel == undefined) { newLevel = 1 };
             
 
-            var levelupData = ranks[newLevel];
+    //        var levelupData = ranks[newLevel];
 
-            var template = kendo.template($("#levelUpTemplate").html());
-            var levelup = kendo.render(template, [levelupData]);
+    //        var template = kendo.template($("#levelUpTemplate").html());
+    //        var levelup = kendo.render(template, [levelupData]);
 
-            $("body").append(levelup);
+    //        $("body").append(levelup);
 
-            var w = $(window).width();
-            var h = $(window).height();
-            var dw = $(".levelup-container").width();
-            var dh = $(".levelup-container").height();
-            var topOffset = 95;
-            var scale = 1;
-            var marginThreshold = 455;
-            if (w < dw + marginThreshold || h < dh + marginThreshold) {
+    //        var w = $(window).width();
+    //        var h = $(window).height();
+    //        var dw = $(".levelup-container").width();
+    //        var dh = $(".levelup-container").height();
+    //        var topOffset = 95;
+    //        var scale = 1;
+    //        var marginThreshold = 455;
+    //        if (w < dw + marginThreshold || h < dh + marginThreshold) {
 
-                var wr = (dw + marginThreshold) / w;
-                var hr = (dh + marginThreshold) / h;
+    //            var wr = (dw + marginThreshold) / w;
+    //            var hr = (dh + marginThreshold) / h;
 
-                if (hr > wr) {
-                    scale = 1 / hr;
-                } else {
-                    scale = 1 / wr;
-                }
+    //            if (hr > wr) {
+    //                scale = 1 / hr;
+    //            } else {
+    //                scale = 1 / wr;
+    //            }
 
-                console.log(wr + " " + hr)
+    //            console.log(wr + " " + hr)
 
-                $(".levelup-container").css("transform", "scale(" + scale + ") ")
+    //            $(".levelup-container").css("transform", "scale(" + scale + ") ")
 
-            }
+    //        }
 
-            var ml = -($(".levelup-container").width()) / 2;
-            var mt = (h - $(".levelup-container").height()) / 2 + (95 * scale);
-            $(".levelup-container").css("top", mt + "px");
-            $(".card-wrapper").css("left", "50%");
-            $(".levelup-container").css("margin-left", ml + "px");
-            $(".levelup-container").fadeIn();
-            self.renderRedButtons();
+    //        var ml = -($(".levelup-container").width()) / 2;
+    //        var mt = (h - $(".levelup-container").height()) / 2 + (95 * scale);
+    //        $(".levelup-container").css("top", mt + "px");
+    //        $(".card-wrapper").css("left", "50%");
+    //        $(".levelup-container").css("margin-left", ml + "px");
+    //        $(".levelup-container").fadeIn();
+    //        self.renderRedButtons();
 
-            setTimeout(function () {
+    //        setTimeout(function () {
 
-                $("body").append('<div id="resultsScrim"></div>');
-                $("#resultsScrim").fadeIn(200);
-                self.startFireworks("body");
-            }, 0);
+    //            $("body").append('<div id="resultsScrim"></div>');
+    //           // $("#resultsScrim").fadeIn(200);
+    //           // self.startFireworks("body");
+    //        }, 0);
 
-            setTimeout(function () {
-                var curr = $(".rank-text.current");
-                var prev = $(".rank-text.prev");
-                kendo.fx(curr).slideIn("down").duration(800).play();
-                kendo.fx(prev).slideIn("up").duration(800).reverse();
-                $(".rank-desc").fadeIn(800)
-                // 
-            }, 1200);
+    //        setTimeout(function () {
+    //            var curr = $(".rank-text.current");
+    //            var prev = $(".rank-text.prev");
+    //            kendo.fx(curr).slideIn("down").duration(800).play();
+    //            kendo.fx(prev).slideIn("up").duration(800).reverse();
+    //            $(".rank-desc").fadeIn(800)
+    //            // 
+    //        }, 1200);
 
 
-            $(".close-levelup").on("click touchend", function () {
-                fadeAudio(currentAudio);
-                $(".card-wrapper").remove();
-                $("#resultsScrim").remove();
-                $("#fireworksiframe").remove();
-                console.log("levelidx: " + configData.gameData.levelIdx);
-                setTimeout(function(){
-                    if (newLevel >= 4) {
-                        gamePlay.getGameOver();
-                    }
-                    gamePlay.checkForPopup();
-                },2000)
-            });
+    //        //$(".close-levelup").on("click touchend", function () {
+    //        //    fadeAudio(currentAudio);
+    //        //    $(".card-wrapper").remove();
+    //        //    $("#resultsScrim").remove();
+    //        //    $("#fireworksiframe").remove();
+    //        //    console.log("levelidx: " + configData.gameData.levelIdx);
+    //        //    setTimeout(function(){
+    //        //        if (newLevel >= 4) {
+    //        //            gamePlay.getGameOver();
+    //        //        }
+    //        //        gamePlay.checkForPopup();
+    //        //    },2000)
+    //        //});
 
-        }, 750);
-    },
+    //    }, 750);
+    //},
 
     showResults: function (correct,expPts, dipPts) {
         console.log("show results");
-        var self = this;
-        if (correct == 1) {
-            expPts = "+" + expPts;
-            dipPts = "+" + dipPts;
-            ptClass = "";
-        } else {
-            expPts = "+" + Math.round(expPts * expReducedPenalty);
-            dipPts = "-" + Math.round(dipPts * reducedPenalty);
-            ptClass = "fail";
-        }
-        var resultsData = [{ correct: correct, expPts: expPts, dipPts: dipPts, ptClass:ptClass, meterValue:configData.gameData.meterValue }];
+        //var self = this;
+        //if (correct == 1) {
+        //  ///  expPts = "+" + expPts;
+        //    dipPts = "+" + dipPts;
+        //    ptClass = "";
+        //} else {
+        //   // expPts = "+" + Math.round(expPts * expReducedPenalty);
+        //    dipPts = "-" + Math.round(dipPts * reducedPenalty);
+        //    ptClass = "fail";
+        //}
+        //var resultsData = [{ correct: correct, expPts: expPts, dipPts: dipPts, ptClass:ptClass, meterValue:configData.gameData.meterValue }];
 
-        var template = kendo.template($("#resultsTemplate").html());
-        var result = kendo.render(template, resultsData);
+        //var template = kendo.template($("#resultsTemplate").html());
+        //var result = kendo.render(template, resultsData);
 
        
 
-        $(".diplomacy-container").append(result)
-        setTimeout(function () {
+        //$(".diplomacy-container").append(result)
+        //setTimeout(function () {
 
-            $("body").append('<div id="resultsScrim"></div>');
-             $("#resultsScrim").fadeIn(200);
-             $("#resultsContainer").fadeIn(400, function () {
-                 self.animateDiploLevel(dipPts);
-                 if (correct == 1) {  
-                    self.startFireworks("body");
-                     self.startFire("#dragonWrapperLrg .dragon-gold");
-                 } else {
-                     self.startSmoke("#dragonWrapperLrg .dragon-gold");
-                 }
-               });
-        }, 200)
+        //    $("body").append('<div id="resultsScrim"></div>');
+        //     $("#resultsScrim").fadeIn(200);
+        //     $("#resultsContainer").fadeIn(400, function () {
+        //         self.animateDiploLevel(dipPts);
+        //         if (correct == 1) {  
+        //            self.startFireworks("body");
+        //             self.startFire("#dragonWrapperLrg .dragon-gold");
+        //         } else {
+        //             self.startSmoke("#dragonWrapperLrg .dragon-gold");
+        //         }
+        //       });
+        //}, 200)
 
         
     },
     animateDiploLevel: function (pts) {
-        pts = parseInt(pts);
-        console.log(pts);
-        console.log(configData.gameData.diplomacyLevel);
-        var finalVal = (configData.gameData.diplomacyLevel + pts) * dMeterAdjust;
-        var dragon = $("#dragonWrapperLrg .dragon-gold");
-        console.log(finalVal)
+       // pts = parseInt(pts);
+       // console.log(pts);
+       // console.log(configData.gameData.diplomacyLevel);
+       // var finalVal = (configData.gameData.diplomacyLevel + pts) * dMeterAdjust;
+       // var dragon = $("#dragonWrapperLrg .dragon-gold");
        // console.log(finalVal)
-        dragon.animate({width: finalVal + "%"},800)
+       //// console.log(finalVal)
+       // dragon.animate({width: finalVal + "%"},800)
 
     },
+    fullItinPrompt: function () {
+        
+        notification("You have filled all the available itinerary slots. Click on an item  to remove it from the itinerary")
 
-    startFireworks: function (elem) {
-        console.log("start fireworks");
+    },
+    gameOverPrompt: function () {
+        var self = this;
+        var templateContent = $("#gameOverPromptTemplate").html();
+        var template = kendo.template(templateContent);
+
+     //   var result = kendo.render(template, []);
+       // console.log(template);
+        $("body").prepend(template);
+        self.renderRedButtons();
+
         var w = $(window).width();
         var h = $(window).height();
-                     $("body").prepend('<iframe id="fireworksiframe" width="' + w + '" height="' + h + '" src="fireworks2.html" style="position:absolute;z-index:50" />');
-                     $("#fireworksiframe").fadeIn();
- setTimeout(function () {
-                         $("#fireworksiframe").remove();
-                     }, 19000);
-        
+        var dw = $(".diplomacy-container").width();
+        var dh = $(".diplomacy-container").height();
+        var topOffset = 95;
+        var scale = 1;
+        console.log(w + " " + h + " " + dw + " " + dh)
+        var marginThreshold = 295;
+
+
+
+        if (w < dw + 170 || h < dh + 170) {
+
+            var wr = (dw + 220) / w;
+            var hr = (dh + 220) / h;
+            var scale;
+            if (hr > wr) {
+                scale = 1 / hr;
+            } else {
+                scale = 1 / wr;
+            }
+
+            console.log(scale)
+
+            $(".diplomacy-container").css("transform", "scale(" + scale + ") ")
+            setTimeout(function () {
+                var ml = -(w - $(".diplomacy-container").width()) / 2 - 40;
+                var mt = (h - $(".diplomacy-container").height()) / 2 - 40;
+
+            }, 300)
+        }
+
+
+        var ml = -($(".diplomacy-container").width()) / 2 - 40;
+        //var mt = (h - $(".diplomacy-container").height()) / 2 + (95*scale) -40;
+        //$(".diplomacy-container").css("top", mt + "px");
+
+        var mt = (h - $(".diplomacy-container").height()) / 2 - 40;
+        $(".diplomacy-container").css("top", mt + "px");
+        $(".card-wrapper").css("left", "50%");
+        $(".diplomacy-container").css("margin-left", ml + "px");
+        $(".diplomacy-container").fadeIn();
+
+
+
+
+        $(".cancel-eval").off();
+        $(".cancel-eval").on("click touchend", function () {
+
+            fadeAudio(audioList.discover);
+            $(".diplomacy-container").fadeOut(200, function () {
+                $(".card-wrapper").remove();
+                $(".diplomacy-container").remove();
+            });
+
+            configData.gameData.popupsExecuting = false
+           // gamePlay.checkForPopup();
+        });
+
+        $(".accept-eval").off();
+        $(".accept-eval").on("click touchend", function () {
+
+            fadeAudio(audioList.discover);
+            $(".diplomacy-container").fadeOut(200, function () {
+                $(".card-wrapper").remove();
+                $(".diplomacy-container").remove();
+
+                // go to game over
+
+                self.getGameOver();
+               // gamePlay.checkForPopup();
+            });
+
+        });
+
     },
-
-    startFire: function (elem) {
-        console.log("start fire")
-		    if ($("#fire")) {
-		        $("#fire").remove();
-}
-		    var scale = .5;
-$("#resultsContainer").prepend("<canvas id='fire' width='400' height='300' style='position:absolute;pointer-events:none;z-index:19' />")
-//$("#fire").css("transform", "scale(" + scale + ") ");
-var imgw = $(elem).find("img").width();
-var elemw = $(elem).width();
-//var pLeft = elemw / 2 + imgw / 2 - 40;
-
-var pLeft;
-var pTop;
-
-if ($(window).width() < 1025) {
-    pLeft = imgw - 90;
-    pTop = $(elem).position().top - 90;
-
-} else {
-    pLeft = imgw - 130;
-    pTop = $(elem).position().top - 50;
-}
-console.log(pLeft);
-//$(elem).position().left;
-		  
-
-
-
-$("#fire").css("left", pLeft + "px");
-$("#fire").css("top", pTop + "px");
-$("#fire").css("z-index", 10);
-cr_createRuntimeFire("fire");
-timeout = setTimeout('$("#fire").remove();', 5500);
-},
-
-    startSmoke: function (elem) {
-
-    if ($("#smoke")) {
-        $("#smoke").remove();
-    }
-
-    $("#resultsContainer").prepend(" <canvas id='smoke' width='400' height='300' style='position:absolute;pointer-events:none;z-index:19' />")
-    var imgw = $(elem).find("img").width();
-    var elemw = $(elem).width();
-    var pLeft =  imgw  - 130;
-    //$(elem).position().left;
-
-    var pTop = $(elem).position().top - 90;
-
-
-    $("#smoke").css("left", pLeft + "px");
-    $("#smoke").css("top", pTop + "px");
-    $("#smoke").css("z-index", 10);
-    cr_createRuntimeSmoke("smoke");
-    timeout = setTimeout('$("#smoke").remove();', 5500);
-},
     getDiscovery: function (id, src) {
         var self = this;
        
@@ -956,6 +1243,12 @@ timeout = setTimeout('$("#fire").remove();', 5500);
         var discData = self.getDiscoveryData(id);
        
         if (discData != null) {
+            if (discData.experiencePoints) {
+                exPts = parseInt(discData.experiencePoints);
+            } else {
+                exPts = 0;
+            }
+            console.log("ex pts: " + exPts);
             var tData = [discData];
 
             var templateContent = $("#discoveryTemplate").html();
@@ -972,7 +1265,7 @@ timeout = setTimeout('$("#fire").remove();', 5500);
             var h = $(window).height();
             var dw = $(".discovery-container").width();
             var dh = $(".discovery-container").height();
-            // console.log(w + " " + h + " " + dw + " " + dh)
+             console.log(w + " " + h + " " + dw + " " + dh)
             if (w < dw + 170 || h < dh + 170) {
 
                 var wr = (dw + 220) / w;
@@ -984,20 +1277,20 @@ timeout = setTimeout('$("#fire").remove();', 5500);
                     scale = 1 / wr;
                 }
 
-                console.log(wr + " " + hr)
+                console.log(scale)
 
                 $(".discovery-container").css("transform", "scale(" + scale + ") ")
                 setTimeout(function () {
-                    var ml = -(w - $(".discovery-container").width()) / 2;
-                    var mt = (h - $(".discovery-container").height()) / 2;
+                    var ml = -(w - $(".discovery-container").width()) / 2 -40;
+                    var mt = (h - $(".discovery-container").height()) / 2-40;
 
                 }, 300)
             }
 
-            var ml = -($(".discovery-container").width()) / 2;
-            var mt = (h - $(".discovery-container").height()) / 2;
+            var ml = -($(".discovery-container").width()) / 2 -40;
+            var mt = (h - $(".discovery-container").height()) / 2-40;
             $(".discovery-container").css("top", mt + "px");
-            $(".card-wrapper").css("left", "50%");
+           // $(".card-wrapper").css("left", "50%");
             $(".discovery-container").css("margin-left", ml + "px");
 
 
@@ -1008,6 +1301,7 @@ timeout = setTimeout('$("#fire").remove();', 5500);
             setTimeout(function () {
                 $(".cancel").off();
                 $(".cancel").on("click touchend", function () {
+                    gamePlay.properties.locked = false;
 
                     fadeAudio(audioList.discover);
                     $(".discovery-container").fadeOut(200, function () {
@@ -1028,14 +1322,17 @@ timeout = setTimeout('$("#fire").remove();', 5500);
                         $(".discovery-container").remove();
                     });
 
-                    if (self.properties.lastFactIdx == self.properties.currentDiscObj.id) {
+
+
+                    // close disc after first question
+                  //  if (self.properties.lastFactIdx == self.properties.currentDiscObj.id) {
 
                 self.properties.currentDiscObj.state = "empty";
                 closeDiscovery(self.properties.currentDiscObj.id);
-                console.log(self.properties.currentDiscObj)
+              //  console.log(self.properties.currentDiscObj)
                         canvas.renderAll();
                         self.properties.lastFactIdx = null;
-                    }
+                   // }
 
                     var templateFContent = $("#discoveryFactTemplate").html();
                     var templateF = kendo.template(templateFContent);
@@ -1053,10 +1350,10 @@ timeout = setTimeout('$("#fire").remove();', 5500);
 
                         $(".dis-btn .continue").on("click touchend", function () {
 
-                           
+                          
                             $(".dis-btn .continue").remove();
-                            updateDiscovery(src);
-                            localesMgmt.updateLocalesStates();
+                           // updateDiscovery(src);
+                          // localesMgmt.updateLocalesStates();
 
                              var bCardData = configData.dsBushCards.getBushCardByArrayId(id);
                             if (bCardData != null) {
@@ -1080,7 +1377,7 @@ timeout = setTimeout('$("#fire").remove();', 5500);
                                 $(".dis-fact").fadeOut(200, function () {
                                     $(".dis-fact").remove();
 
-                                    self.checkForPopup();
+                                   // self.checkForPopup();
                                 });
                             } else {
                             $(".fact-text").hide();
@@ -1092,12 +1389,30 @@ timeout = setTimeout('$("#fire").remove();', 5500);
 
  var itinItem = discData;
                         $(".itin-btns .itin-yes").on("click touchend", function () {
-                           
-                           
-                            var dup = configData.dsItinerary.ds.get(itinItem.Id)
-                        if (dup == undefined) {
-                            configData.dsItinerary.ds.add(itinItem);
-                        }
+                            console.log("itin-yes");
+                            gamePlay.properties.locked = false;
+
+                            playAudio(audioList.itinerary);
+                            var expPts = parseInt(exPts);
+                            configData.gameData.adjustRank(expPts);
+                            playAudio(audioList.itinerary);
+
+                            var dup = configData.dsItinerary.ds.get(itinItem.Id);
+                            var totalItin = configData.dsItinerary.ds.data().length;
+                            console.log(dup);
+                            console.log(totalItin);
+                            console.log(itinSlots);
+                            if (dup == undefined) {
+                                //&& totalItin < itinSlots
+                                // configData.dsItinerary.ds.add(itinItem);
+                                self.addItinItemFromDialog(itinItem)
+
+                                if (totalItin >= itinSlots) {
+                                    console.log("auto add to viewed list");
+                                    configData.dsViewedLocales.ds.add(itinItem)
+                                }
+                            }
+                        
 
                             $(".dis-fact").fadeOut(200, function () {
                                 $(".dis-fact").remove();
@@ -1107,7 +1422,11 @@ timeout = setTimeout('$("#fire").remove();', 5500);
                         })
 
                         $(".itin-btns .itin-no").on("click touchend", function () {
- console.log(itinItem);
+                            console.log(itinItem);
+                            gamePlay.properties.locked = false;
+
+                            var expPts = parseInt(exPts);
+                            configData.gameData.adjustRank(expPts);
 
                             var dup = configData.dsViewedLocales.ds.get(itinItem.Id)
                             if (dup == undefined) {
@@ -1134,6 +1453,15 @@ timeout = setTimeout('$("#fire").remove();', 5500);
            // closeDiscovery(src)
         }
 
+
+           
+           
+             
+              //  configData.gameData.adjustDipLevel(pts);
+
+       
+
+
     },
     removeItinItem: function (itemId) {
        
@@ -1155,163 +1483,304 @@ if(item){
 
     },
     addItinItem: function (itemId) {
-
+        var self = this;
         console.log("add");
 
-        var item = configData.dsViewedLocales.ds.get(itemId)
-        if (itemId != undefined) {
+        if (configData.dsItinerary.ds.data().length < itinSlots) {
+            playAudio(audioList.itinerary);
+            var item = configData.dsViewedLocales.ds.get(itemId)
+            if (itemId != undefined) {
+                if (configData.dsViewedLocales.ds.data.length <= itinSlots) {
+                    var dup = configData.dsItinerary.ds.get(itemId)
+                    if (dup == undefined) {
+                        configData.dsItinerary.ds.add(item);
+                        configData.dsViewedLocales.ds.remove(item)
 
-            var dup = configData.dsItinerary.ds.get(itemId)
-            if (dup == undefined) {
-                configData.dsItinerary.ds.add(item);
-                configData.dsViewedLocales.ds.remove(item)
-
+                    }
+                }
             }
-           
+
+            // show itin panel
+            self.expandItin()
+            $(".itin-wrapper").show();
+            $(".viewed-locales-wrapper").hide();
+            var buttongroup = $("#btnGroup").data("kendoMobileButtonGroup");
+            buttongroup.select(0);
+            $(".head-left").text("Presidential");
+            $(".head-rt").text("Itinerary");
+        } else {
+
+           // notification("You have filled all the available itinerary slots. Click on an item  to remove it from the itinerary")
+
+            if (configData.gameData.popupEvents.length == 0) {
+                console.log("add and show");
+                self.addPopupEvent('gamePlay.fullItinPrompt');
+                self.checkForPopup();
+            } else {
+                console.log("add only");
+                self.addPopupEvent('gamePlay.fullItinPrompt');
+            }
         }
+    },
+    addItinItemFromDialog: function (itinItem) {
+        var self = this;
+        console.log("add from dialog");
+        console.log(itinItem);
+        if (configData.dsItinerary.ds.data().length < itinSlots) {
+            playAudio(audioList.itinerary);
+          
+            configData.dsItinerary.ds.add(itinItem);
+            // show itin panel
+            self.expandItin()
+            $(".itin-wrapper").show();
+            $(".viewed-locales-wrapper").hide();
+            var buttongroup = $("#btnGroup").data("kendoMobileButtonGroup");
+            buttongroup.select(0);
+            $(".head-left").text("Presidential");
+            $(".head-rt").text("Itinerary");
+        } else {
+
+            //notification("You have filled all the available itinerary slots. Click on an item  to remove it from the itinerary")
+
+            if (configData.gameData.popupEvents.length == 0) {
+                console.log("add and show");
+                self.addPopupEvent('gamePlay.fullItinPrompt');
+                self.checkForPopup();
+            } else {
+                console.log("add only");
+                self.addPopupEvent('gamePlay.fullItinPrompt');
+            }
+        }
+    },
+    collapseItin: function () {
+        var self = this;
+        console.log("collapse");
+        var itinH = $("#itinerary").height();
+        var itinTop = $("#itinerary").offset().top;
+        self.properties.itinH = itinH;
+        self.properties.itinTop = itinTop;
+        $("#itinerary").css("height", "50px");
+        var btnEx = $(".btn-expand i")
+        btnEx.removeClass("fa-angle-double-up");
+        btnEx.addClass("fa-angle-double-down");
+        btnEx.attr("title", "Expand Itinerary");
+
+        if ($(".itin-wrapper").is(":visible") == true) {
+            $(".itin-wrapper").hide();
+            self.properties.itinState = "itin"
+        } else {
+        $(".viewed-locales-wrapper").hide();
+            self.properties.itinState = "viewed"
+        }
+       
+        
+        self.properties.itinExpanded = false;
+        $("#itinerary").css("bottom", "auto");
+        $("#itinerary").css("top", self.properties.itinTop + "px");
+
+    },
+    expandItin: function () {
+        var self = this;
+        var itinH = self.properties.itinH;
+        var itinTop = $("#itinerary").offset().top;
+        self.properties.itinTop = itinTop;
+        $("#itinerary").css("height", itinH + "px");
+
+        var btnEx = $(".btn-expand i")
+        btnEx.addClass("fa-angle-double-up");
+        btnEx.removeClass("fa-angle-double-down");
+        
+        btnEx.attr("title", "Collapse Itinerary")
+
+
+        if (self.properties.itinState == "itin") {
+            $(".itin-wrapper").show();
+        } else {
+        $(".viewed-locales-wrapper").show();
+        }
+        
+        
+        self.properties.itinExpanded = true;
+        $("#itinerary").css("bottom", "auto");
+        $("#itinerary").css("top", self.properties.itinTop + "px");
+    },
+    initBCard: function () {
+        var self = this;
+
+        events.subscribe("dsBushCardsReady", function (ds) {
+            console.log(ds.ds.data());
+            var data = ds.ds.data().toJSON();
+            self.getBushCard(data[0],15)
+
+        })
+
+        configData.dsBushCards.getDataSource()
+
     },
     getBushCard: function (bCardData,pts) {
         var self = this;
+        configData.gameData.popupsExecuting = true;
        // configData.gameData.showingBushCard = true;
-        setTimeout(function () {
+      //  console.log($(".bcard-full-container").length);
+        if ( $(".bcard-full-container").length == 0) {
+            setTimeout(function () {
+                console.log(">>>>> create bcard");
+                playAudio(audioList.bushCard);
+                collectedCards++
+                bCardData.collectedNum = collectedCards;
+                var bData = [bCardData];
 
-            playAudio(audioList.bushCard);
-            collectedCards++
-            bCardData.collectedNum = collectedCards;
-            var bData = [bCardData];
+                var bTemplateContent = $("#bCardTemplate").html();
+                var bTemplate = kendo.template(bTemplateContent);
 
-            var bTemplateContent = $("#bCardTemplate").html();
-            var bTemplate = kendo.template(bTemplateContent);
+                // console.log(tData);
 
-            // console.log(tData);
+                var bResult = kendo.render(bTemplate, bData);
 
-            var bResult = kendo.render(bTemplate, bData);
+                $("body").prepend(bResult);
+                self.renderRedButtons();
 
-            $("body").prepend(bResult);
-            self.renderRedButtons();
-
-            var w = $(window).width();
-            var h = $(window).height();
-            var dw = $(".bcard").width() + $(".bcard-content").width();
-            var dh = $(".bcard-content").height();
-            // console.log(w + " " + h + " " + dw + " " + dh)
-            // if (w < dw + 100 || h < dh + 100) {
-
-
-            if (w < 750) {
-                var wr = (dw + 200) / w;
-                var hr = (dh + 150) / h;
-                var scale;
-                if (hr > wr) {
-                    scale = 1 / hr;
-                } else {
-                    scale = 1 / wr;
-                }
-
-                console.log(wr + " " + hr)
-
-                $(".bcard").css("transform", "scale(" + scale + ") ");
-                $(".bcard-content").css("transform", "scale(" + scale + ") ")
-
-                var ml = -($(".bcard").width()) / 2;
-                var mt = (h - $(".bcard").height()) / 2 - 25;
-                $(".bcard").css("top", mt + "px");
-                $(".card-wrapper").css("left", "-7%");
+                var w = $(window).width();
+                var h = $(window).height();
+                var dw = $(".bcard").width() + $(".bcard-content").width();
+                var dh = $(".bcard-content").height();
+                // console.log(w + " " + h + " " + dw + " " + dh)
+                // if (w < dw + 100 || h < dh + 100) {
 
 
+                //if (w < 750) {
+                //    var wr = (dw + 200) / w;
+                //    var hr = (dh + 150) / h;
+                //    var scale;
+                //    if (hr > wr) {
+                //        scale = 1 / hr;
+                //    } else {
+                //        scale = 1 / wr;
+                //    }
 
-                var bcl = ($(".card-wrapper").offset().left + $(".bcard").width()) * scale - 10;
-                var bct = h / 2 - $(".bcard-content").height() / 2;
-                console.log($(".card-wrapper").width());
-                console.log($(".bcard").width());
-                $(".bcard-content").css("left", bcl + "px");
-                $(".bcard-content").css("top", bct + "px");
+                //    console.log(wr + " " + hr)
 
-                //setTimeout(function () {
-                //    var ml = -(w - $(".bcard").width()) / 2;
-                //    var mt = (h - $(".bcard").height()) / 2;
+                //    $(".bcard").css("transform", "scale(" + scale + ") ");
+                //    $(".bcard-content").css("transform", "scale(" + scale + ") ")
 
-                //}, 300)
-            } else {
-
-                if (w < 1025) {
-
-
-                    var wr = (dw + 350) / w;
-                    var hr = (dh + 350) / h;
-                    var scale;
-                    if (hr > wr) {
-                        scale = 1 / hr;
-                    } else {
-                        scale = 1 / wr;
-                    }
-
-                    console.log(wr + " " + hr)
-
-                    $(".bcard").css("transform", "scale(" + scale + ") ");
-                    $(".bcard-content").css("transform", "scale(" + scale + ") ")
-
-                    var ml = -($(".bcard").width()) / 2;
-                    var mt = (h - $(".bcard").height()) / 2 - 25;
-                    $(".bcard").css("top", mt + "px");
-                    $(".card-wrapper").css("left", "15%");
+                //    var ml = -($(".bcard").width()) / 2;
+                //    var mt = (h - $(".bcard").height()) / 2 - 25;
+                //    $(".bcard").css("top", mt + "px");
+                //    $(".bcard-wrapper").css("left", "-7%");
 
 
 
-                    var bcl = ($(".card-wrapper").offset().left + $(".bcard").width()) * scale + 25;
-                    var bct = h / 2 - $(".bcard-content").height() / 2;
-                    console.log($(".card-wrapper").width());
-                    console.log($(".bcard").width());
-                    $(".bcard-content").css("left", bcl + "px");
-                    $(".bcard-content").css("top", bct + "px");
+                //    var bcl = ($(".card-wrapper").offset().left + $(".bcard").width()) * scale - 10;
+                //    var bct = h / 2 - $(".bcard-content").height() / 2;
+                //    console.log($(".card-wrapper").width());
+                //    console.log($(".bcard").width());
+                //    $(".bcard-content").css("left", bcl + "px");
+                //    $(".bcard-content").css("top", bct + "px");
 
-                } else {
+                //    //setTimeout(function () {
+                //    //    var ml = -(w - $(".bcard").width()) / 2;
+                //    //    var mt = (h - $(".bcard").height()) / 2;
 
-                    var ml = -($(".bcard").width()) / 2;
-                    var mt = (h - $(".bcard").height()) / 2;
-                    $(".bcard").css("top", mt + "px");
+                //    //}, 300)
+                //} else {
 
-                    var cardLeftPos = $(window).width() / 2 - ($(".card-wrapper").width() + $(".bcard").width()) / 1.1
-                    $(".card-wrapper").css("left", cardLeftPos + "px");
+                //    if (w < 1025) {
 
 
 
-                    var bcl = $(".card-wrapper").offset().left + $(".bcard").width() - 20;
-                    var bct = h / 2 - $(".bcard-content").height() / 2;
-                    console.log($(".card-wrapper").width());
-                    console.log($(".bcard").width());
-                    $(".bcard-content").css("left", bcl + "px");
-                    $(".bcard-content").css("top", bct + "px");
+                //        var ml = -($(".bcard").width()) / 2;
+                //        var mt = (h - $(".bcard").height()) / 2;
+                //        $(".bcard").css("top", mt + "px");
 
-                }
-            }
+                //        var cardLeftPos = $(window).width() / 2 - ($(".bcard-wrapper").width() + $(".bcard").width()) / 1.1
+                //        $(".bcard-wrapper").css("left", cardLeftPos + "px");
 
-            // set events
 
-            $(".save-card").off();
-            $(".save-card").on("click touchend", function () {
 
-                self.hideBushCard(bCardData,pts);
-            
+                //        var bcl = $(".bcard-wrapper").offset().left + $(".bcard").width() - 20;
+                //        var bct = h / 2 - $(".bcard-content").height() / 2;
+                //        console.log($(".bcard-wrapper").width());
+                //        console.log($(".bcard").width());
+                //        $(".bcard-content").css("left", bcl + "px");
+                //        $(".bcard-content").css("top", bct + "px");
 
-            })
 
-            $(".bcard").fadeIn(350);
+                //        //var wr = (dw + 200) / w;
+                //        //var hr = (dh + 200) / h;
+                //        //var scale;
+                //        //if (hr > wr) {
+                //        //    scale = 1 / hr;
+                //        //} else {
+                //        //    scale = 1 / wr;
+                //        //}
 
-        }, 500);
+                //        //console.log(wr + " " + hr)
+
+                //        //$(".bcard").css("transform", "scale(" + scale + ") ");
+                //        //$(".bcard-content").css("transform", "scale(" + scale + ") ")
+
+                //        //var ml = -($(".bcard").width()) / 2;
+                //        //var mt = (h - $(".bcard").height()) / 2 - 25;
+                //        //$(".bcard").css("top", mt + "px");
+                //        //$(".bcard-wrapper").css("left", "15%");
+
+                //        //console.log($(".bcard-wrapper").offset().left);
+
+                //        //var bcl = ($(".bcard-wrapper").offset().left + $(".bcard").width()) * scale + 25;
+                //        //var bct = h / 2 - $(".bcard-content").height() / 2;
+                //        //console.log($(".bcard-wrapper").width());
+                //        //console.log($(".bcard").width());
+                //        //$(".bcard-content").css("left", bcl + "px");
+                //        //$(".bcard-content").css("top", bct + "px");
+
+                //    } else {
+
+                //        //var ml = -($(".bcard").width()) / 2;
+                //        //var mt = (h - $(".bcard").height()) / 2;
+                //        //$(".bcard").css("top", mt + "px");
+
+                //        //var cardLeftPos = $(window).width() / 2 - ($(".bcard-wrapper").width() + $(".bcard").width()) / 1.1
+                //        //$(".bcard-wrapper").css("left", cardLeftPos + "px");
+
+
+
+                //        //var bcl = $(".bcard-wrapper").offset().left + $(".bcard").width() - 20;
+                //        //var bct = h / 2 - $(".bcard-content").height() / 2;
+                //        //console.log($(".bcard-wrapper").width());
+                //        //console.log($(".bcard").width());
+                //        //$(".bcard-content").css("left", bcl + "px");
+                //        //$(".bcard-content").css("top", bct + "px");
+
+                //    }
+                //}
+
+                // set events
+
+                $(".save-card").off();
+                $(".save-card").on("click touchend", function () {
+
+                    self.hideBushCard(bCardData, pts);
+                    fadeAudio(currentAudio);
+
+                })
+
+                $(".bcard-full-container").fadeIn(350);
+
+            }, 0);
+        }
     },
     hideBushCard: function (bCardData,pts) {
         configData.gameData.addBushCard(bCardData);
 
-        $(".bcard").fadeOut(200, function () {
-            $(".bcard").remove();
+        $(".bcard-full-container").fadeOut(400, function () {
+            $(".bcard-full-container").remove();
         });
 
         $(".bcard-content").fadeOut(600, function () {
-            $(".bcard-content").remove();
-            $(".card-wrapper").remove();
+        //    $(".bcard-content").remove();
+        //    $(".card-wrapper").remove();
 
-           // configData.gameData.showingBushCard = false;
+            configData.gameData.showingBushCard = false;
             if( pts != undefined && pts != 0){
                 configData.gameData.adjustRank(pts);            
             }
@@ -1351,39 +1820,56 @@ if(item){
             $(".close-bush-cards").on("click touchend", function () {
                 fadeAudio(currentAudio);
                 self.removeBushCards();   
+                setTimeout(function () {
+                    $(".getbcardfull").on("click touchend", function () {
+                        if ($(".card-wrapper").length == 0) {
+                            $(".getbcardfull").off();
+                            gamePlay.getBcardLayout();
+                        }
+                    });
+
+                }, 250);
             });
           
-            $.each(configData.gameData.savedBushCards.data().toJSON(), function (idx, item) {
-                 console.log(item.number)
+          $.each(configData.gameData.savedBushCards.data().toJSON(), function (idx, item) {
+          //  $.each(configData.dsBushCards.ds.data().toJSON(), function (idx, item) {
+
+
+                console.log(item.number)
 
                 var num = parseInt(item.number) - 1;
                 setTimeout(function () {
                     kendo.fx($(".bcardfull-container").eq(num)).flip("horizontal", $(".bc-front").eq(num), $(".bc-back").eq(num)).duration(500).play();
                 }, idx * 500);
+               
+           
+
             });
 
-            if (isMobile == false) {
-                self.renderRedButtons();
+             if (isMobile == false) {
+                 self.renderRedButtons();
 
-                $("#bCardLayout .print").off();
-                $("#bCardLayout .print").on("click touchend", function () {
+                 $("#bCardLayout .print").off();
+                 $("#bCardLayout .print").on("click touchend", function () {
 
-                    gamePlay.printElement($("#cardsList").html(), "bCards")
-                });
-            }
-         }, 500);
+                     gamePlay.printElement($("#cardsList").html(), "bCards")
+                 });
+             } else {
+
+             }
+         }, 1000);
 
     },
     scaleBushCards: function () {
 
         var availW = $(window).width() - 100;
-          var availH = $(window).height() - ($(".heading-text").height() + $("#bCardLayout .header").height())-50;
+          var availH = $(window).height() - ($(".heading-text").height() + $("#bCardLayout .header").height())-105;
            
-        var cardW = $(".bcardfull-content").width() ;
+        var cardW = $(".bcardfull-content").width()+50 ;
         var cardH = $(".bcardfull-content").height();
         var wScale = availW / (cardW * 5)
         var hScale = availH / (cardH * 2);
-        var listW = cardW *5 +70;
+        var listW = cardW *5 + 70;
         var clhOriginal = cardH * 2;
         console.log(availW + " " + availH);
         if (wScale < hScale) {
@@ -1420,7 +1906,7 @@ if(item){
                  var newMargin = $(".cards-wrapper").eq(0).position().top; //0;//cardH * hScale / 2; cardH * hScale / 3;//
              
                  $("#cardsList").css("margin-top", -(newMargin+10) + "px")
-                   listW = listW * hScale;
+                   listW = listW * hScale +50;
             } else {
 
                 $(".cards-wrapper").css("transform", 'scale(' + 1 + ')');
@@ -1451,6 +1937,7 @@ if(item){
 //kendo.fx($(this)).flip("horizontal", $(".bc-front"), $(".bc-back")).duration(1000).play();
 
       //  })
+        console.log(bResult);
        return bResult 
     },
     removeBushCards: function () {
@@ -1459,7 +1946,7 @@ if(item){
        
     },
     renderRedButtons: function () {
-
+        var self = this;
         $(".red-btn-container").each(function (idx, item) {
            // console.log($(item).html())
             if ($(item).html() == "") {
@@ -1478,6 +1965,7 @@ if(item){
                 if ($(item).data().height) {
                     btnData.height = $(item).data().height + "px";
                     btnData.styles = btnData.styles + ";height: " + btnData.height;
+                    btnData.styles = btnData.styles + ";height: " + btnData.height;
                 }
 
                 if ($(item).data().fontsize) {
@@ -1492,166 +1980,50 @@ if(item){
                 var result = kendo.render(template, [btnData]);
 
                 $(item).html(result);
+
+                if ($(item).data().fontsize) {
+                   // $(item).css("font-size", $(item).data().fontsize + "px")
+                }
+                if ($(item).parent().parent().hasClass("discovery-container") == false && $(window).width() < 750) {
+
+                   var scale = .65;
+                  //  $(item).css("transform", "scale(" + scale + ") ")
+                }
+               
+
             }
             });
+
+
+        self.renderStars();
         
+
     },
-    getCareer: function () {
-        var self = this;
-        playAudio(audioList.career)
+    renderStars: function () {
+$(".star-container").each(function (idx, item) {
+            var num = $(item).data().stars;
+            console.log(num);
+            var starTemplate = kendo.template($("#starTemplate").html());
+           // var starResult = kendo.render(starTemplate,[]);
+           // console.log(starTemplate);
+    $(item).html(starTemplate);
 
-        console.log(configData.gameData.achievementList.data().length);
-        var aNum = configData.gameData.achievementList.data().length == undefined ? 0: configData.gameData.achievementList.data().length;
-
-        configData.gameData.set("achievementNum", aNum)
-        var careerVM = kendo.observable({
-            activities: configData.gameData.careerList,
-            expLevel: configData.gameData.expLevel,
-            levelup: configData.gameData.levelup,
-            ranksList:ranks,
-            achievements: configData.gameData.achievementList,
-           // achievements: configData.dsAchievements.ds,
-            achievementNum: configData.gameData.achievementNum,
-            achievementTotal: configData.gameData.achievementTotal,
-            totalCards:configData.gameData.totalCards,
-            savedCardsNum: configData.gameData.savedCardsNum,
-        });
-        var cTemplateContent = $("#careerTemplate").html();
-        var cTemplate = kendo.template(cTemplateContent);
-
-        var cResult = kendo.render(cTemplate, [careerVM]);
-
-        $("body").prepend(cResult);
-        kendo.bind($("#careerLayout"), careerVM);
-
-        if (isMobile == true) {
-            var lists = $(".sc-content");
-            lists.removeClass("sc-content");
-            lists.addClass("sc-content-mobile");
-
-            $('.c-list-card').on('touchend', function () {
-                var el = $(this);
-                if (el.scrollTop() <= 0) {
-                    el.scrollTop(1);
+    if ($(item).data().height) {
+        var btnDataHeight = $(item).data().height + "px";
+        $(item).css("height", btnDataHeight)
+    }
+            $(item).find(".star").each(function (idx, star) {
+                if (idx >= num) {
+$(star).addClass("faded")
                 }
-                if (el.scrollTop() >= el[0].scrollHeight) {
-                    el.scrollTop(el[0].scrollHeight - 1);
-                }
+
             });
 
-           
-        }
-       
-        $("#careerLayout .rank-list .item").eq(configData.gameData.rankIdx).addClass("sel-rank");
-        $("#careerLayout .rank-list .item").eq(configData.gameData.rankIdx).prepend("<i class='fa fa-caret-right'></i>");
-
-        $(".view-bcards").off();
-        $(".view-bcards").on("click touchend", function () {
-            fadeAudio(currentAudio);
-            $("#careerLayout").remove();
-            $("#careerScrim").remove();
-
-            gamePlay.getBcardLayout();
         });
-
-        $(".close-career").off();
-        $(".close-career").on("click touchend", function () {
-            fadeAudio(currentAudio);
-            $("#careerLayout").remove();
-            $("#careerScrim").remove();
-        });
-
-
-        $(".reset-game").off();
-        $(".reset-game").on("click touchend", function () {
-            location.href = configData.gameData.appPage;
-
-            //app.mobileApp.navigate("components/intro/view.html")
-            // app.mobileApp.navigate("#intro")
-            //app.home.navToIntro(self);
-        });
-
-
-        if (isMobile == false) {
-
-            self.renderRedButtons();
-            $(".print").off();
-            $(".print").on("click touchend", function () {
-                //self.printElement($(".card-content.achievements"))
-                self.printElement($("#achievementList"), "achievements")
-
-
-            })
-        }
-        self.scaleCareers();
-    },
-    scaleCareers: function () {
-
-        var availW = $(window).width() - 100;
-        var availH = $(window).height() - ($(".heading-text").height() + $("#bCardLayout .header").height()) - 50;
-
-        var carW = $(".career-content").width();
-        var carH = $(".career-content").height();
-        var wScale = availW / (carW )
-        var hScale = availH / (carH );
-       // var listW = cardW * 5 + 70;
-       // var clhOriginal = cardH * 2;
-        console.log(availW + " " + availH);
-        if (wScale < hScale) {
-            if (wScale < 1) {
-                console.log("scale by width");
-                //$(".career-content").css("width", carW * wScale + "px");
-               // $(".career-wrapper").css("transform", 'scale(' + wScale + ')');
-
-
-                var transTop = (1 - wScale) * 100 / 2;
-                $(".career-content").css({ transform: 'translate(0% ,-' + transTop + '%) scale(' + wScale + ')' });
-
-            //    console.log(cardW + " " + wScale);
-               // $(".career-wrapper").css("margin-top", (carH * wScale) - carH + "px");
-               // $("#cardsList").css("margin-left", "-60px");
-              //  var newMargin = $(".career-wrapper").eq(0).position().top;
-               // $("#cardsList").css("margin-top", (newMargin + 10) + "px")
-               // listW = listW * wScale;
-            } else {
-
-                $(".career-wrapper").css("transform", 'scale(' + 1 + ')');
-
-            }
-
-        } else {
-
-            if (hScale < 1) {
-
-                console.log("scale by height");
-              //  $(".career-content").css("height", carH * hScale + "px");
-                //$(".career-content").css("width", carW * hScale + "px");
-              //  $(".career-content").css("transform", 'scale(' + hScale + ')');
-                var transTop = (1 - hScale)*100/2 ;
-                $(".career-content").css({ transform: 'translate(0% ,-' + transTop + '%) scale(' + hScale + ')' });
-
-                console.log(carH + " " + hScale);
-
-               // clhNew = clhOriginal * hScale;
-              //  var offset = $(".heading-text").height() + $("#bCardLayout .heading").height();
-              //  var newMargin = $(".cards-wrapper").eq(0).position().top; //0;//cardH * hScale / 2; cardH * hScale / 3;//
-
-              //  $("#cardsList").css("margin-top", -(newMargin + 10) + "px")
-               // listW = listW * hScale;
-            } else {
-
-                $(".career-wrapper").css("transform", 'scale(' + 1 + ')');
-
-            }
-
-        }
-
-       // $("#cardsList").css("width", listW + "px");
-       // $("#cardsList").css("margin-left", ($(window).width() - listW) / 2 - 35 + "px");
-
 
 
     },
+   
     scaleGameOver: function () {
         console.log("scale gameover");
         var availW = $(window).width() - 100;
@@ -1713,13 +2085,101 @@ if(item){
     getGameOver: function () {
         var self = this;
         var activityNum;
+        configData.gameData.gameOver = true;
+        var itinData = configData.dsItinerary.ds.data().toJSON();
+        var starTotal = 0;
+        var catTotal = 0;
+        var usedCats = [];
+       
+        var starAvg = 0;
+
+        $.each(itinData, function (idx, item) {
+
+            console.log(item);
+            starTotal = starTotal + item.stars;
+
+            var newCat = item.category.id
+
+            if (usedCats.indexOf(newCat) == -1) {
+
+                usedCats.push(newCat)
+            }
+
+        })
+        catTotal = usedCats.length;
+        starAvg = Math.round(starTotal / itinSlots);
+        var txtStarAvg = "You've earned a " + starAvg + "-star rating! "
+        console.log(starTotal);
+        console.log(catTotal);
+        console.log(starAvg);
+        var txtQuality = "";
+        var txtVariety = "";
+        var txtEval = "";
+        var possiblePts = configData.gameData.discPtsTotal + configData.gameData.dipPtsTotal;
+        var txtPts = "You earned a total of " + configData.gameData.expLevel + " points out of " + possiblePts +  " possible points and unlocked " + configData.gameData.savedCardsNum + " out of " + configData.gameData.totalCards + " Bush Cards.<br>";
+       // var txtBcards = "";
+
+        var exVariety = false;
+        var exQuality = false;
+
+        if (starTotal <= 18) {
+            txtQuality = "Hmmm...your suggested itinerary doesn't really represent the most interesting or valuable experiences for the President's visit to India."
+        }
+
+
+        if (starTotal>18 && starTotal <= 21) {
+            txtQuality = "Pretty good. You chose fairly interesting and valuable experiences for the President's trip to India. "
+            exQuality = true;
+        }
+
+        if (starTotal > 21 ) {
+            txtQuality = "Well done! You chose some of the most interesting and valuable experiences for the President's trip to India.  "
+            exQuality = true;
+        }
+
+        if (catTotal <= 1) {
+            txtVariety = "Your itinerary doesn't offer enough variety.";
+        }
+
+        if (catTotal > 1 && catTotal <= 2) {
+            txtVariety = "Your itinerary really needs more variety. ";
+        }
+
+        if (catTotal > 2 &&  catTotal <= 3) {
+            txtVariety = "Your itinerary has good variety.";
+            exVariety = true;
+        }
+
+        if (catTotal > 3 && catTotal <= 4) {
+            txtVariety = "Your itinerary has excellent variety.";
+            exVariety = true;
+        }
+
+        if (exQuality == true && exVariety == true) {
+            txtEval = "Your itinerary is approved! You get a promotion.";
+        } else {
+            txtEval = "The White House revises your itinerary. Next time, aim for highest quality and greatest variety of experiences for the President's itinerary."  
+        }
+
+       // txtVariety = txtPts + txtVariety;
+
+
+        console.log(txtPts);
+        //var objEval = new kendo.data.ObservableObject({
+        //    data: {txtEval:txtEval,txtVariety:txtVariety, txtQuality:txtQuality, txtYourScore:txtPts}
+
+        //})
+
+
+
+
+       
         var careerVM = kendo.observable({
-            activities: configData.gameData.careerList,
-            expLevel: configData.gameData.expLevel,
-            currentRank: ranks[configData.gameData.rankIdx].name,
+            
             totalCards: configData.gameData.totalCards,
             savedCardsNum: configData.gameData.savedCardsNum,
-            activityNum: configData.gameData.careerList.length,
+           scrapPgs:configData.gameData.scrapPgs,
+            txtEval: txtEval, txtVariety: txtVariety, txtQuality: txtQuality, txtYourScore: txtPts, starAvg: starAvg, txtStarAvg: txtStarAvg
         });
         var cTemplateContent = $("#gameCompletedTemplate").html();
         var cTemplate = kendo.template(cTemplateContent);
@@ -1728,36 +2188,205 @@ if(item){
 
         $("body").prepend(cResult);
         kendo.bind($("#gameoverLayout"), careerVM);
+        console.log(txtQuality);
+
+        self.getGameOverItin();
         self.renderRedButtons()
        
 
+        playAudio(audioList.gameover);
+       
 
-        playAudio(audioList.levelUp);
-
-
-        $(".view-bcards").off();
-        $(".gameover-content .view-bcards").on("click touchend", function () {
+        $(".view-bcardicon").off();
+        $(".gameover-content .view-bcardicon").on("click touchend", function () {
             fadeAudio(currentAudio);
            
-
+            console.log("get bcards");
             gamePlay.getBcardLayout();
         });
 
-        $(".gameover-content .btn-career").on("click touchend", function () {
+        $(".view-scrap-icon").off();
+        $(".gameover-content .view-scrap-icon").on("click touchend", function () {
             fadeAudio(currentAudio);
-            gamePlay.getCareer();
+
+            console.log("get scrapbook");
+            gamePlay.getScrapbook();
         });
 
 
-        $(".gameover-content .play-again").on("click touchend", function () {
-            fadeAudio(currentAudio);
+        $(".gameover-content .play-again-btn").on("click touchend", function () {
+           // fadeAudio(currentAudio);
+            console.log("replay");
             location.href = configData.gameData.appPage;
 
         });
-        this.scaleGameOver();
+       // this.scaleGameOver();
 
     },
+    getGameOverItin: function () {
 
+        var templateContent = $("#itinerary-gameover").html();
+        var template = kendo.template(templateContent);
+
+        // console.log(tData);
+
+       // var result = kendo.render(template, tData);
+
+        $(".gameover-itin").html(template);
+
+
+
+
+        var itinList = $("#itinGameOver").kendoMobileListView({
+            dataSource: configData.dsItinerary.ds,
+            template: $("#itinTemplate-gameover").html(),
+            // appendOnRefresh: true,
+            autoBind: true,
+            dataBound: function () {
+                gamePlay.renderStars();
+                gamePlay.renderRedButtons();
+                gamePlay.addSpacers();
+                setTimeout(function () {
+                    //if ($(window).width() < 1250) {
+                       // $("#itinerary").css("top", "40%");
+                        //$("#itinerary").css("left", "50%")
+                    //}
+                }, 50);
+
+            }
+        }).data("kendoMobileListView");
+    },
+    getScrapbook: function () {
+        var self = this;
+        console.log("scrapbook");
+        var cTemplateContent = $("#scrapbookTemplate").html();
+        var cTemplate = kendo.template(cTemplateContent);
+       // var data = dsScrapbook.ds.data().toJSON();
+        //var cResult = kendo.render(cTemplate,data );
+
+        $("body").prepend(cTemplate);
+       // kendo.bind($("#gameoverLayout"), careerVM);
+        self.renderRedButtons();
+        playAudio(audioList.scrapbook);
+
+        $(".close-scrap").on("click", function () {
+            fadeAudio(currentAudio);
+            $("#scrapbookLayout").fadeOut(200, function () {
+               
+               // $("#lvScrapPgs").data("kendoMobileListView").dataSource.page(1);
+                $("#scrapbookLayout").remove();
+                $(".scrap-bkgrd").remove();
+                $(".last-scrap").remove();
+            })
+        })
+
+        var sbReady = events.subscribe("dsScrapBookReady", function (data) {
+            sbReady.remove();
+            var ds;
+
+            if (configData.gameData.gameOver == true) {
+                ds = data.ds.data()
+            } else {
+
+              ds=  data.ds.view()
+            }
+
+            var maxPgs = data.ds.data().length;
+           // console.log(maxPgs);
+
+          //  console.log(data.ds.view());
+            var dsSbpgs = new kendo.data.DataSource({
+                data: ds , //data.ds.view(),
+                pageSize:1,
+            })
+
+
+  var sb = $("#lvScrapPgs").kendoMobileListView({
+      dataSource: dsSbpgs,
+       template:$("#scrapbookPageTemplate").html(),
+  }).data("kendoMobileListView");
+
+            var sbds = sb.dataSource;
+            var sbPg = sbds.page();
+           
+
+            if (sbPg <= 1) {
+                $(".sb-prev").addClass("disabled");
+            } else {
+                $(".sb-prev").removeClass("disabled");
+            }
+            if (sbPg >= sbds.totalPages()) {
+                $(".sb-next").addClass("disabled");
+                $(".last-scrap").fadeIn();
+            } else {
+                $(".sb-next").removeClass("disabled");
+                $(".last-scrap").hide();
+            }
+
+
+            $(".sb-next").on("click", function () {
+
+
+
+              //  kendo.fx($("lvScrapPgs")).pageturnHorizontal($(".sbpg1"), $(".sbpg2")).play();
+                var newPg = sbPg + 1;
+
+                if (sbds.totalPages() > sbds.page()) {
+                   
+
+                    sbds.page(newPg );
+                    sbPg = newPg;
+                }
+
+
+                if (newPg <= 1) {
+                    $(".sb-prev").addClass("disabled");
+                } else {
+                    $(".sb-prev").removeClass("disabled");
+                }
+                if (newPg >= sbds.totalPages()) {
+                    $(".sb-next").addClass("disabled");
+                    if (newPg < maxPgs) {
+                        $(".last-scrap").fadeIn();
+                    }
+                } else {
+                    $(".sb-next").removeClass("disabled");
+                    $(".last-scrap").hide();
+                }
+            })
+
+
+            $(".sb-prev").on("click", function () {
+ var newPg = sbPg - 1;
+
+                if (sbds.page() > 1) {
+                   
+                    sbds.page(newPg );
+                    sbPg = newPg;
+                } 
+
+                if (newPg <= 1) {
+                    $(".sb-prev").addClass("disabled");
+                } else {
+                    $(".sb-prev").removeClass("disabled");
+                }
+                if (newPg >= sbds.totalPages()) {
+                    $(".sb-next").addClass("disabled");
+                    $(".last-scrap").fadeIn();
+                } else {
+                    $(".sb-next").removeClass("disabled");
+                    $(".last-scrap").hide();
+                }
+
+            })
+        })
+
+       
+
+        configData.dsScrapbook.getDataSource();
+
+
+    },
     evalDipResp: function (e, dipPts, expPts) {
         var self = this;
        // console.log(risk);
@@ -1770,18 +2399,14 @@ if(item){
       
         if (correct == 1) {
 
-            //if (risk == "low") {
-            //    playAudio(audioList.goodLow);
-            //} else {
-            //    playAudio(audioList.goodHigh);
-            //}
+           
 
             playAudio(audioList.goodLow);
 
 
 
 
-            $(".card-content .heading").text("DIPLOMACY SUCCESS");
+           // $(".card-content .heading").text("DIPLOMACY SUCCESS");
 
            // $(".card-content .heading").text($(e.target).data().corrresp);
             $(".q-wrapper").hide();
@@ -1800,7 +2425,7 @@ if(item){
 
             playAudio(audioList.badLow);
 
-            $(".card-content .heading").text("DIPLOMACY FAILURE");
+           // $(".card-content .heading").text("DIPLOMACY FAILURE");
 
             $(".q-wrapper").hide();
             $(".incorr-resp").show();
@@ -1808,8 +2433,9 @@ if(item){
             currRespStatus = 0;
            
         }
-      
-        self.showResults(correct, expPts, dipPts)
+
+        $(".card-content .continue").show();
+      //  self.showResults(correct, expPts, dipPts)
     },
 
     evalRandom: function (correct) {
@@ -1850,12 +2476,12 @@ if(item){
                 configData.gameData["earned-" + id]++;
                 if(configData.gameData["earned-" + id] == configData.gameData["required-" + id]) {
                     console.log(configData.gameData["required-" + id]);
-                    var achievement = configData.dsAchievements.ds.get(id);
-                    configData.gameData.achievementList.add(achievement);
+                   // var achievement = configData.dsAchievements.ds.get(id);
+                  //  configData.gameData.achievementList.add(achievement);
 
-                    console.log(configData.gameData.achievementList.data());
+                   // console.log(configData.gameData.achievementList.data());
                     // self.showAchievement(achievement);
-                    self.addPopupEvent('gamePlay.showAchievement', achievement)
+                   // self.addPopupEvent('gamePlay.showAchievement', achievement)
                 }
                 
             }
@@ -1912,66 +2538,66 @@ if(item){
             $(".close-achievement").on("click touchend", function () {
                 fadeAudio(currentAudio);
                 $(".card-wrapper").remove();
-                gamePlay.checkForPopup();
+               // gamePlay.checkForPopup();
              
             });
 
         }, 750);
     },
     showGametip: function (tipData) {
-        var self = this;
-        console.log("show gametip");
-        setTimeout(function () {
+        //var self = this;
+        //console.log("show gametip");
+        //setTimeout(function () {
            
            
-            var template = kendo.template($("#gametipTemplate").html());
-            var achievementHtml = kendo.render(template, [tipData]);
-            console.log(tipData)
-            $("body").append(achievementHtml);
+        //    var template = kendo.template($("#gametipTemplate").html());
+        //    var achievementHtml = kendo.render(template, [tipData]);
+        //    console.log(tipData)
+        //    $("body").append(achievementHtml);
 
-            var w = $(window).width();
-            var h = $(window).height();
-            var dw = $(".gametip-container").width();
-            var dh = $(".gametip-container").height();
-            var topOffset = 10;
-            var scale = 1;
-            var marginThreshold = 455;
-            if (w < dw + marginThreshold || h < dh + marginThreshold) {
+        //    var w = $(window).width();
+        //    var h = $(window).height();
+        //    var dw = $(".gametip-container").width();
+        //    var dh = $(".gametip-container").height();
+        //    var topOffset = 10;
+        //    var scale = 1;
+        //    var marginThreshold = 455;
+        //    if (w < dw + marginThreshold || h < dh + marginThreshold) {
 
-                var wr = (dw + marginThreshold) / w;
-                var hr = (dh + marginThreshold) / h;
+        //        var wr = (dw + marginThreshold) / w;
+        //        var hr = (dh + marginThreshold) / h;
 
-                if (hr > wr) {
-                    scale = 1 / hr;
-                } else {
-                    scale = 1 / wr;
-                }
+        //        if (hr > wr) {
+        //            scale = 1 / hr;
+        //        } else {
+        //            scale = 1 / wr;
+        //        }
 
-                console.log(wr + " " + hr)
+        //        console.log(wr + " " + hr)
 
-                $(".gametip-container").css("transform", "scale(" + scale + ") ")
+        //        $(".gametip-container").css("transform", "scale(" + scale + ") ")
 
-            }
+        //    }
 
-            var ml = -($(".gametip-container").width()) / 2;
-            var mt = (h - $(".gametip-container").height()) / 2 + (topOffset * scale);
-            $(".gametip-container").css("top", mt + "px");
-            $(".card-wrapper").css("left", "50%");
-            $(".gametip-container").css("margin-left", ml + "px");
-            $(".gametip-container").fadeIn();
-            self.renderRedButtons();
-
-
+        //    var ml = -($(".gametip-container").width()) / 2;
+        //    var mt = (h - $(".gametip-container").height()) / 2 + (topOffset * scale);
+        //    $(".gametip-container").css("top", mt + "px");
+        //    $(".card-wrapper").css("left", "50%");
+        //    $(".gametip-container").css("margin-left", ml + "px");
+        //    $(".gametip-container").fadeIn();
+        //    self.renderRedButtons();
 
 
-            $(".close-gametip").on("click touchend", function () {
+
+
+        //    $(".close-gametip").on("click touchend", function () {
                
-                $(".card-wrapper").remove();
-                gamePlay.checkForPopup();
+        //        $(".card-wrapper").remove();
+        //        gamePlay.checkForPopup();
 
-            });
+        //    });
 
-        }, 750);
+        //}, 750);
     },
     addPopupEvent: function (callback, data) {
         
@@ -1982,7 +2608,11 @@ if(item){
 
     },
     checkForPopup: function () {
-        if (configData.gameData.popupEvents.length > 0) {
+        var self = this;
+        console.log("chk for popup");
+        console.log(configData.gameData.popupEvents);
+        console.log(configData.gameData.popupsExecuting);//&& configData.gameData.popupsExecuting == false
+        if (configData.gameData.popupEvents.length > 0 && self.checkOpenPopups() == false) {
             configData.gameData.popupsExecuting = true;
             setTimeout(function () {
                 console.log(configData.gameData.popupEvents)
@@ -1993,36 +2623,50 @@ if(item){
                 configData.gameData.popupEvents.splice(0, 1);
             }, 350);
         } else {
-            configData.gameData.popupsExecuting = false;
+            if (self.checkOpenPopups() == false ) {
+                configData.gameData.popupsExecuting = false;
+            }
+            
         }
 
         // show msg 1 after first activity
-        console.log(configData.gameData.popupEvents.length);
-        console.log(configData.gameData.activityNum);
-        if (configData.gameData.popupEvents.length == 0 && configData.gameData.activityNum ==1) {
-         gamePlay.showMessage(1);
-        }
+       // deprecated
+        //if (configData.gameData.popupEvents.length == 0 && configData.gameData.activityNum ==1) {
+        // gamePlay.showMessage(1);
+        //}
+    },
+    checkOpenPopups: function () {
+        var openPopups = false;
+
+        if ($(".bcard-full-container").length > 0) { openPopups = true }
+        if ($(".notification-container").length > 0) { openPopups = true }
+        if ($(".diplomacy-container").length > 0) { openPopups = true }
+        if ($(".discovery-container").length > 0) { openPopups = true }
+
+        return openPopups;
+
+    },
+
+    usedAllLocales: function () {
+        notification("Wow! You have seen all the sights.Time to finalize and submit your itinerary for review.")
+
     },
     showMessage: function (msgId) {
-        var template = kendo.template($("#messageTemplate").html());
 
-        mData = messages[msgId];
-        var mssgHtml = kendo.render(template, [mData]);
-        console.log(mData)
-        $("body").append(mssgHtml);
+        // deprecated
+        //var template = kendo.template($("#messageTemplate").html());
 
+        //mData = messages[msgId];
+        //var mssgHtml = kendo.render(template, [mData]);
+        //console.log(mData)
+        //$("body").append(mssgHtml);
 
-       // setTimeout(function () {
-           // $("body").on("click touchend", function () {
-                //$(".messagebar").remove();
-           // });
-
-            setTimeout(function () { $(".messagebar").remove(); }, 40000);
-       // }, 2000);
+        //    setTimeout(function () { $(".messagebar").remove(); }, 40000);
+       
     },
     setupPrint: function (el, pType, orientation) {
 
-        $("body").append("<div id='printWindow'><div id='printArea'></div></div>")
+        $("body").prepend("<div id='printWindow'><div id='printArea'></div></div>")
         console.log('setup')
         var css;
 
@@ -2040,8 +2684,8 @@ if(item){
                     var availW = printArea.width() - 150;
                     var availH = printArea.height() - 150;
                     printArea.find(".cards-wrapper").css("transform", 'scale(' + 1 + ')');
-                    var cardW = 270// printArea.find(".bcardfull-content").width()+40;
-                    var cardH = 331//printArea.find(".bcardfull-content").height();
+                    var cardW =300// 270// printArea.find(".bcardfull-content").width()+40;
+                    var cardH =361// 331//printArea.find(".bcardfull-content").height();
                     var wScale = availW / ((cardW * 5) + 5 * 20)
                     var hScale = availH / (cardH * 2);
                     var listW = cardW * 5 + 70;
@@ -2074,27 +2718,9 @@ if(item){
                 printArea.css("@page", "{size:landscape}")
             }
 
-            if (pType == "achievements") {
-                printArea.addClass("portrait")
-                printArea.append("<img class='achieve-header' src=" + badgeHeader + " /><div class='achieve-header-text'>Earned Badges</div>")
-                printArea.append("<div id='printAchieveList' >test</div>")
-
-                //class="career-list sc-content" data-role="listview" data-template="achievementsTemplate" data-bind="source:achievements"
-                // configData.gameData.achievementList
-                setTimeout(function () {
-
-                    console.log($("#printAchieveList"))
-                    $("#printAchieveList").kendoMobileListView({
-                        template: kendo.template($("#achievementsTemplate").html()),
-                        dataSource: configData.gameData.achievementList,
-                    })
-                }, 50);
-
-               css = '@page { size: portrait; }'
-    
-            }
-
-            printArea.append('<div class="close-print"><i class="fa fa-times-circle-o fa-3x"></i></div>');
+          
+            //printArea.append('<div class="close-print"><i class="fa fa-times-circle-o fa-3x"></i></div>');
+            printArea.append('<div id="closePrint" class="close-print">X</div>');
 
             $(".close-print").on("click touchend", function () { $("#printWindow").remove(); });
 
@@ -2121,7 +2747,7 @@ if(item){
     printElement: function (el, pType, orientation) {
         var self = this;
         //  var w = window.open("print.html");
-       
+        const style = '@page { size:landscape, margin: 0.5in } @media print {  }'
         window.el = el;
         window.pType = pType;
         self.setupPrint(el, pType);
@@ -2129,18 +2755,71 @@ if(item){
             console.log("printing");
            // alert("printstart")
             $("#printWindow").focus();
-            window.print();
-           
+           // window.print();
+
+
+
+ //           window.addEventListener("afterprint", function (event) { console.log('after printing'); });
+ //       window.onafterprint = function (event) { console.log('after printing2'); };
+
+ //       if (window.matchMedia) {
+ //           var mediaQueryList = window.matchMedia('print');
+ //           mediaQueryList.addListener(function (mql) {
+ //               console.log(mql);
+ //               if (mql.matches) {
+ //                  // beforePrint();
+ //               } else {
+ //                   afterPrint();
+ //               }
+ //           });
+ //       }
+ //var afterPrint = function () {
+ //               console.log('Functionality to run after printing');
+ //           };
+
+
+
+
+            printJS({
+                printable: 'printArea', type: 'html', targetStyles: ['*'], ignoreElements: ["closePrint"], style: style,
+                onPrintDialogClose: function () {
+                    console.log('The print dialog was closed');
+                    $("#printWindow").remove();   
+                },
+            })
+
+            //onPrintDialogClose: function () {
+            //    console.log("close print");
+            //    printClose()
+            //}
            // alert("printend")
 
            // $("#printWindow").remove();
             // using matchwindow watcher to detect print completion
-            //setTimeout(function () {
-            //  $("#printWindow").remove();
-            // }, 1000);
-        }, 1000)
+            setTimeout(function () {
+              $("#printWindow").remove();
+             }, 500);
 
-        
+
+            //var onPrintFinished = function (printed) { console.log("do something..."); }
+
+
+           
+
+           
+            //window.onbeforeprint = beforePrint;
+            //window.onafterprint = afterPrint;
+        }, 500)
+
+ 
+            
     },
 }
 
+
+ 
+ function printClose() {
+
+            $("#printWindow").remove();
+
+        }

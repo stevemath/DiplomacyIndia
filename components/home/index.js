@@ -37,8 +37,8 @@ app.home = kendo.observable({
 
            
             setTimeout(function(){
-                //  resizeCanvas();
-                repositionCanvas();
+                // resizeCanvas();
+              repositionCanvas();
             },200)
         }
     },
@@ -95,24 +95,20 @@ var bkgrdImg;
 var srcLocales = [];
 var currentAudio = null;
 
-//var workingH = 766;
-//var workingW = 1280;
-
-var workingH = 600;
-var workingW = 1070;
-
-//var workingH = 799;
-//var workingW = 1424;
-
-//var workingH = 875;
-//var workingW = 1450;
 
 
+//var workingH = 640;
+//var workingW = 1070;
+
+var workingH = 762;
+var workingW = 1280;
+//var workingH = 723;
+//var workingW = 1120;
 
 function updateDiscovery(id) {
     var src = selectObject(id);
     if (src.state == "ready") {
-        src.set("stroke", "#309060");
+        src.set("stroke", "#ddc82c");
         src.set("strokeWidth", 3);
         canvas.renderAll();
     }
@@ -302,9 +298,9 @@ function resizeCanvas() {
     var hMenuOffset = 45;
    
     var w = $(window).width(); //window.innerWidth; 
-    var h = $(window).height() - hMenuOffset; //window.innerHeight; 
+    var h = $(window).height() //- hMenuOffset; //window.innerHeight; 
  if (w > 1000) {
-     workingH = 635;
+     workingH = 752;
     // workingH = 875;
     }
     var ofh = (imgH - workingH) / 2;
@@ -350,7 +346,7 @@ function resizeCanvas() {
                     // adjust by height
                     console.log("adjust to height");
                     zRatio = h / ch;
-
+                    console.log(h + " " + ch);
                     zoomIt(zRatio);
                  
                     var marginLeft = (w - $("canvas").width()) / 2;

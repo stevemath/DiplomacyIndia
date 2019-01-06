@@ -39,8 +39,14 @@
      for (var i = 0; i < namespaces.length; i++) {
          context = context[namespaces[i]];
      }
-     return context[func].apply(context, args);
- }
+     if (context[func]) {
+         return context[func].apply(context, args);
+     } else {
+         return null
+     }
+    
+}
+
 
  function parseArray(arrList) {
      var template = "<ul>";
@@ -140,7 +146,7 @@ function getDisplayName(cleanText){
 
 function playAudio(item) {
     console.log(item)
-    if (currentAudio != null && item != currentAudio) {
+    if (item != null && currentAudio != null && item != currentAudio   ) {
         console.log("stop audio");
         currentAudio.pause();
         currentAudio.currentTime = 0;
@@ -160,7 +166,7 @@ function fadeAudio(item) {
    // audio.pause();
     //audio.currentTime = 0;
     
-  //  console.log("fade audio");
+   // console.log("fade audio");
     if (item != null && item.paused == false) {
         if (kendo.support.mobileOS.device != "iphone" &&  kendo.support.mobileOS.device != "ipad") {
 

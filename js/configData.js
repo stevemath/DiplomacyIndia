@@ -9,9 +9,10 @@ var configData = {
         maxDis: maxDis,
         currDip: 0,
         currDis: 0,
-        pendingLevelup:null,
+      //  pendingLevelup:null,
         currentDate: currentDate,
         factsToView: null,
+        gameOver:false,
         viewedFacts: null,
         usedFacts: null,
         randomDip: null,
@@ -36,10 +37,13 @@ var configData = {
         testDip: null,
         rank: "",
         rankIdx:0,
-        levelup: "",
+       // levelup: "",
         currExpLevel:0,
         savedCardsNum: 0,
-        totalCards:0,
+        scrapPgs:1,
+        totalCards: 0,
+        unlockedScrapPages: 1,
+        totalScrapPages:0,
         addBushCard: function (bCardData) {
             var self = this;
             this.savedBushCards.add(bCardData);
@@ -69,12 +73,47 @@ var configData = {
 
 
             if (expLevel < 0) { expLevel = 0 };
-            console.log(expLevel)
+            console.log(expLevel);
+           
+
+
             this.set("expLevel", expLevel);
             this.setRank();
             localesMgmt.checkExpThreshold(expLevel);
+            if (canvas) {
+                localesMgmt.updateLocalesStates();
+            }
+            // update scrapbook pages unlocked
+            this.checkScrapLevel(expLevel);
         },
-       
+        checkScrapLevel: function (exp) {
+            var self = this;
+
+
+            var sbookReady = events.subscribe("dsScrapBookReady", function (data) {
+                sbookReady.remove();
+                var sbds = data.ds;
+                var sbLen = sbds.data().length;
+                console.log(sbLen);
+
+                sbds.query({
+                    sort: { field: "idx", dir: "asc" },
+                    filter: {field:"expPts",operator:"lte", value:exp}
+                }).then(function (e) {
+                    var view = sbds.view();
+                    console.log(view); 
+                    self.set("unlockedScrapPages", sbds.view().length);
+                    // update gamedata
+                    configData.gameData.scrapPgs = sbds.view().length;
+                });
+
+            });
+
+
+          
+            configData.dsScrapbook.getDataSource()
+
+        },
         setRank: function () {
          //   if (this.showingBushCard == false) {
                 console.log("set rank");
@@ -83,7 +122,7 @@ var configData = {
                 var nxt = ranks[0].nextLevel;
                 var levelIdx = 0;
                 $.each(ranks, function (idx, item) {
-                    console.log(item.points + " " + self.expLevel)
+                   // console.log(item.points + " " + self.expLevel)
                     if (item.points <= self.expLevel && self.expLevel !=0) {
                         newRank = item.name;
                         if (ranks[idx + 1]) {
@@ -97,23 +136,23 @@ var configData = {
                 });
 
                // console.log(this.rank == newRank);
-                if (this.rankIdx != levelIdx && levelIdx > 0) {
-                    console.log(this.rank + " " + newRank);
+                //if (this.rankIdx != levelIdx && levelIdx > 0) {
+                //    console.log(this.rank + " " + newRank);
 
-                    //gamePlay.showLevelUp(levelIdx);
-                    gamePlay.addPopupEvent('gamePlay.showLevelUp', levelIdx)
-                }
+                //    //gamePlay.showLevelUp(levelIdx);
+                //    gamePlay.addPopupEvent('gamePlay.showLevelUp', levelIdx)
+                //}
 
                 this.set("rankIdx", levelIdx);
-                this.set("rank", "Rank: " + newRank);
+              //  this.set("rank", "Rank: " + newRank);
                
-                if (nxt != null) {
-                    $(".levelup-textlabel").show();
-                    this.set("levelup", "at " + nxt);
-                } else {
-                    $(".levelup-textlabel").hide();
-                    this.set("levelup", "");
-                }
+                //if (nxt != null) {
+                //    $(".levelup-textlabel").show();
+                //    this.set("levelup", "at " + nxt);
+                //} else {
+                //    $(".levelup-textlabel").hide();
+                //    this.set("levelup", "");
+                //}
 
                 
            // }
@@ -241,7 +280,7 @@ var configData = {
                 console.log("get tip 0");
 
                 var tipData = { heading: "A Good Diplomat <br/>is a Knowledgeable Diplomat!", text: "The more you know about China, the better you'll be at your job! By exploring the country, you'll gain tidbits of information that you can use during your diplomacy activities. It's better to rely on your knowledge than random luck!" };
-                gamePlay.addPopupEvent("gamePlay.showGametip", tipData);
+               // gamePlay.addPopupEvent("gamePlay.showGametip", tipData);
 
                 self.tips0Shown = true;
             }
@@ -257,7 +296,7 @@ var configData = {
         self.gameData.careerList = [];
         self.gameData.achievementList = new kendo.data.DataSource({});
         // bind game data to toolbar
-        kendo.bind($("#toolbar"),this.gameData);
+        kendo.bind($(".tool-links"),this.gameData);
       //  kendo.bind($("#dragonWrapper"), this.gameData);
         kendo.bind($(".status-item"), this.gameData);
        
@@ -266,173 +305,9 @@ var configData = {
     },
 
  
- //   dsMulti: {
- //       ds: null,
- //       staticData: null,
- //       init: function () {
+ 
 
- //           var self = this;
- //           self.ds = new kendo.data.DataSource({
- //            //   offlineStorage: "dsMulti",
- //               type: 'everlive',
- //               filter: { logic: "and", filters: [ { field: "localeId", operator: "ne", value: "" }, ] },
- //               transport: {
- //                   typeName: 'diplomacy',
-
- //               },
- //               schema: {
- //                   parse: function (data) {
- //                       var response = data.result;
- //                      // console.log(data.result)
- //                       var arrMulti = [];
- //                       for (var i = 0; i < response.length; i++) {
- //                           var lid = null;
- //                          // console.log(response[i])
- //                           if (response[i].localeId && response[i].localeId.Id != undefined && response[i].localeId.Id != null) {
-
- //                               lid = response[i].localeId.Id;
- //                           } else {
- //                               if (response[i].localeId != null && typeof response[i].localeId == "string") {
- //                                  // console.log(response[i].localeId);
- //                                   lid = response[i].localeId;
- //                               }
-                               
- //                           }
-                           
- //                          if (lid != null) {
-                               
-                         
- //                               var item = {
- //                                   localeId: lid , //response[i].localeId,
- //                                   unlocks: response[i].arrUnlocks,
- //                                   activityId: response[i].Id,
- //                                   rr: response[i].risk,
- //                                   Id: response[i].Id
- //                               };
- //                               arrMulti.push(item);
-                             
- //                           }
-
- //                           if (i == response.length-1) {
- ////console.log("****** multi ******");
- ////                       console.log(arrMulti)
- //                        return arrMulti;
- //                           }
- //                       }
-                     
-                       
- //                   },
- //                   model: {
- //                       id: Everlive.idField,
- //                      // id:localeId.Id,
- //                       fields: {
- //                           localeId: { defaultValue: { name: "", Id: "" }, },
-
- //                       }
- //                   }
- //               },
-
- //               serverFiltering: true,
-
- //           });
-
- //           this.ds.fetch(function () {
- //               self.staticData = self.ds.data().toJSON();
- //               console.log(self.staticData);
- //               events.publish("dsMultiReady", { ds: self.ds });
-
- //           });
-
- //       },
- //       getDataSource: function () {
-
- //           if (this.ds == null) {
- //               this.init();
- //           } else {
- //               events.publish("dsMultiReady", { ds: this.ds });
-
- //           }
-
- //       },
-
- //   },
-
-    dsDiplomacyEL: {
-        ds: null,
-        staticData: null,
-        init: function () {
-
-            var self = this;
-            self.ds = new kendo.data.DataSource({
-                type: 'everlive',
-                transport: {
-                    typeName: 'diplomacy',
-                    update: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                    destroy: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                    create: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                },
-                schema: {
-                    //parse: function (data) {
-                    //    var response = data.result;
-                    //    // console.log(data.result)
-                    //    var items = [];
-                    //    for (var i = 0; i < 1; i++) {
-                    //        configData.gameData.testDip = response[i].Id;
-                    //            var item = response[i]
-                    //            items.push(item);
-
-
-                    //    }
-                    //    return items;
-
-                    //},
-                    model: {
-                        id: Everlive.idField,
-
-                        fields: {
-
-                            discoveryId: { defaultValue: {}, },
-                            localeId: { defaultValue: {}, },
-                            correctResponse: { defaultValue: { title: '', text: '', subtext: '', bullets: [] } },
-                            incorrectResponse: { defaultValue: { title: '', text: '', subtext: '', bullets: [] } },
-                            quizIntro: { defaultValue: "", type: "string", },
-                            intro: { defaultValue: "", type: "string", }
-                        }
-                    }
-                },
-                serverFiltering: false,
-
-            });
-
-            this.ds.fetch(function () {
-                self.staticData = self.ds.data().toJSON();
-                console.log("init dip list: " + self.ds.data().length)
-                events.publish("dsDiplomacyReady", { ds: self.ds });
-
-            });
-
-        },
-        getDataSource: function () {
-            var self = this;
-
-            if (self.ds == null || self.ds.data().length == 0) {
-                this.init();
-            } else {
-                console.log(self.ds);
-                console.log("get dip list: " + self.ds.data().length)
-                events.publish("dsDiplomacyReady", { ds: self.ds });
-
-            }
-
-        },
-
-    },
+   
     dsDiplomacyStatic: {
         ds: null,
         staticData: null,
@@ -573,11 +448,17 @@ var configData = {
                     }
                 },
                 serverFiltering: false,
-
+                aggregate: [
+                    { field: "experiencePoints", aggregate: "sum" },
+                ]
             });
 
             this.ds.fetch(function () {
                 self.staticData = self.ds.data().toJSON();
+
+                var dipPtTotal = self.ds.aggregates().experiencePoints;
+                console.log(">>>> dip pts>>>> " + dipPtTotal.sum);
+                configData.gameData.dipPtsTotal = dipPtTotal.sum;
 
                 console.log(self.ds.data().toJSON())
                 events.publish("dsDiplomacyReady", { ds: self.ds });
@@ -597,95 +478,7 @@ var configData = {
         },
 
     },
-    dsMultiEL: {
-        ds: null,
-        staticData: null,
-        init: function () {
-
-            var self = this;
-            self.ds = new kendo.data.DataSource({
-                type: 'everlive',
-                filter: { logic: "and", filters: [{ field: "localeId", operator: "ne", value: "" }, ] },
-                transport: {
-                    typeName: 'diplomacy',
-
-                },
-                schema: {
-                    parse: function (data) {
-                        var response = data.result;
-                        // console.log(data.result)
-                        var arrMulti = [];
-                        for (var i = 0; i < response.length; i++) {
-                            var lid = null;
-                            // console.log(response[i])
-                            if (response[i].localeId && response[i].localeId.Id != undefined && response[i].localeId.Id != null) {
-
-                                lid = response[i].localeId.Id;
-                            } else {
-                                if (response[i].localeId != null && typeof response[i].localeId == "string") {
-                                    // console.log(response[i].localeId);
-                                    lid = response[i].localeId;
-                                }
-
-                            }
-
-                            if (lid != null) {
-
-
-                                var item = {
-                                    localeId: lid, //response[i].localeId,
-                                    unlocks: response[i].arrUnlocks,
-                                    activityId: response[i].Id,
-                                   // rr: response[i].risk,
-                                    Id: response[i].Id
-                                };
-                                arrMulti.push(item);
-
-                            }
-
-                            if (i == response.length - 1) {
-                                //console.log("****** multi ******");
-                                //                       console.log(arrMulti)
-                                return arrMulti;
-                            }
-                        }
-
-
-                    },
-                    model: {
-                        id: Everlive.idField,
-                        // id:localeId.Id,
-                        fields: {
-                            localeId: { defaultValue: { name: "", Id: "" }, },
-
-                        }
-                    }
-                },
-
-                serverFiltering: true,
-
-            });
-
-            this.ds.fetch(function () {
-                self.staticData = self.ds.data().toJSON();
-                console.log(self.staticData);
-                events.publish("dsMultiReady", { ds: self.ds });
-
-            });
-
-        },
-        getDataSource: function () {
-
-            if (this.ds == null) {
-                this.init();
-            } else {
-                events.publish("dsMultiReady", { ds: this.ds });
-
-            }
-
-        },
-
-    },
+   
     dsMultiStatic: {
         ds: null,
         staticData: null,
@@ -861,147 +654,7 @@ var configData = {
         },
 
     },
-    dsItinerary: {
-        ds: null,
-        staticData: null,
-        init: function () {
-           // var tbl = "diplomacy";
-            var self = this;
-            self.ds = new kendo.data.DataSource({
-                autoSync:true,
-                 schema: {
-                   
-                    model: {
-                        id: "Id",
-                        fields: {
-                            Id: { defaultValue: "", },
-
-                        }
-                    }
-                },
-
-                serverFiltering: false,
-
-            });
-
-            this.ds.fetch(function () {
-                self.staticData = self.ds.data().toJSON();
-                console.log("*** dsItin data")
-                console.log(self.staticData);
-                events.publish("dsItinReady", { ds: self.ds });
-
-            });
-
-        },
-        getDataSource: function () {
-
-            if (this.ds == null) {
-                this.init();
-            } else {
-                events.publish("dsItinReady", { ds: this.ds });
-
-            }
-
-        },
-
-    },
-    dsViewedLocales: {
-        ds: null,
-        staticData: null,
-        init: function () {
-            // var tbl = "diplomacy";
-            var self = this;
-            self.ds = new kendo.data.DataSource({
-                autoSync: true,
-                schema: {
-
-                    model: {
-                        id: "Id",
-                        fields: {
-                            Id: { defaultValue: "", },
-
-                        }
-                    }
-                },
-
-                serverFiltering: false,
-
-            });
-
-            this.ds.fetch(function () {
-                self.staticData = self.ds.data().toJSON();
-                console.log("*** dsViewed data")
-                console.log(self.staticData);
-                events.publish("dsViewedReady", { ds: self.ds });
-
-            });
-
-        },
-        getDataSource: function () {
-
-            if (this.ds == null) {
-                this.init();
-            } else {
-                events.publish("dsViewedReady", { ds: this.ds });
-
-            }
-
-        },
-
-    },
-    dsDiscoveryEL: {
-        ds: null,
-        staticData: null,
-        init: function () {
-
-            var self = this;
-            self.ds = new kendo.data.DataSource({
-                type: 'everlive',
-                transport: {
-                    typeName: 'discovery',
-                    update: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                    destroy: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                    create: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                },
-                schema: {
-                    model: {
-                        id: Everlive.idField,
-                        fields: {
-                            category: { defaultValue: { id: '', name: '' } },
-
-                        }
-                    }
-                },
-                serverFiltering: false,
-
-            });
-
-            this.ds.fetch(function () {
-                self.staticData = self.ds.data().toJSON();
-
-                events.publish("dsDiscoveryReady", { ds: self.ds });
-
-            });
-
-        },
-        getDataSource: function () {
-
-            if (this.ds == null) {
-                this.init();
-            } else {
-                events.publish("dsDiscoveryReady", { ds: this.ds });
-
-            }
-
-        },
-
-    },
+  
     dsDiscoveryStatic: {
         ds: null,
         staticData: null,
@@ -1125,12 +778,17 @@ var configData = {
                     }
                 },
                 serverFiltering: false,
-                sort: { field: "category.name", dir: "asc" }
+                sort: { field: "category.name", dir: "asc" },
+                aggregate: [
+                    { field: "experiencePoints", aggregate: "sum" }, 
+                ]
             });
 
             this.ds.fetch(function () {
                 self.staticData = self.ds.data().toJSON();
-
+                var discPtTotal = self.ds.aggregates().experiencePoints;
+                console.log(">>>> disc pts>>>> " + discPtTotal.sum);
+                configData.gameData.discPtsTotal = discPtTotal.sum;
                 events.publish("dsDiscoveryReady", { ds: self.ds });
 
             });
@@ -1149,68 +807,7 @@ var configData = {
 
     },
 
-    dsFactsEL: {
-        ds: null,
-        staticData: null,
-        init: function () {
-
-            var self = this;
-            self.ds = new kendo.data.DataSource({
-                type: 'everlive',
-                transport: {
-                    typeName: 'facts',
-                    update: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                    destroy: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                    create: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                },
-                schema: {
-                    model: {
-                        id: Everlive.idField,
-                        fields: {
-                            discoveryId: { defaultValue: { id: '', name: '' } },
-                        }
-                    }
-                },
-                change: function (e) {
-                    // console.log(e);
-                    if (e.sender._filter != undefined && e.items.length > 0) {
-                        var filFacts = e.items;
-                        var discLen = filFacts.length;
-                        var idx = getRandomInt(0, discLen - 1);
-
-                    }
-                },
-
-                serverFiltering: false,
-
-            });
-
-            self.ds.fetch(function () {
-                self.staticData = self.ds.data().toJSON();
-
-                events.publish("dsFactsReady", { ds: self.ds });
-
-            });
-
-        },
-        getDataSource: function () {
-
-            if (this.ds == null) {
-                this.init();
-            } else {
-                events.publish("dsFactsReady", { ds: this.ds });
-
-            }
-
-        },
-
-    },
+  
     dsFactsStatic: {
         ds: null,
         staticData: null,
@@ -1385,63 +982,7 @@ var configData = {
 
     },
 
-    dsMCQuizEL: {
-        ds: null,
-        staticData: null,
-        init: function () {
-
-            var self = this;
-            self.ds = new kendo.data.DataSource({
-                type: 'everlive',
-                transport: {
-                    typeName: 'multipleChoiceQuiz',
-                    update: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                    destroy: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                    create: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                },
-                schema: {
-                    model: {
-                        id: Everlive.idField,
-                        fields: {
-                            factId: { defaultValue: { id: '', name: '' } },
-                            category: { defaultValue: { id: '', name: '' } },
-                            //   correctResponse: { defaultValue: { title: '', text: '', subtext: '', bullets: [] } },
-                            // incorrectResponse: { defaultValue: { title: '', text: '', subtext: '', bullets: [] } },
-                            answers: { defaultValue: [] },
-
-                        }
-                    }
-                },
-                serverFiltering: false,
-
-            });
-
-            this.ds.fetch(function () {
-                self.staticData = self.ds.data().toJSON();
-
-                events.publish("dsMCQuizReady", { ds: self.ds });
-
-            });
-
-        },
-        getDataSource: function () {
-
-            if (this.ds == null) {
-                this.init();
-            } else {
-                events.publish("dsMCQuizReady", { ds: this.ds });
-
-            }
-
-        },
-
-    },
+    
     dsMCQuizStatic: {
         ds: null,
         staticData: null,
@@ -1598,203 +1139,7 @@ var configData = {
         },
 
     },
-    dsLocalesEL: {
-        ds: null,
-        staticData: null,
-        init: function () {
-
-            var self = this;
-            self.ds = new kendo.data.DataSource({
-                type: 'everlive',
-                transport: {
-                    typeName: 'locales',
-                    update: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                    destroy: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                    create: {
-                        headers: { 'Authorization': "Bearer " + sessionStorage.accessToken }
-                    },
-                },
-                schema: {
-                    parse: function (data) {
-                        var response = data.result;
-                        // console.log(data.result)
-                        var arrLocales = [];
-                        for (var i = 0; i < response.length; i++) {
-                            var item = response[i];
-                            if (typeof item.randomLevel == "undefined") {
-                                item.randomLevel = { id: 0, name: "Newbie" }
-                            }
-
-                            arrLocales.push(item);
-                        }
-                        console.log(arrLocales);
-                        return arrLocales;
-                    },
-                    model: {
-                        id: Everlive.idField,
-                        fields: {
-                            state: { type: "string" },
-                            unlocks: { defaultValue: {} },
-                            dipContent: { defaultValue: {} },
-                            disContent: { defaultValue: {} },
-                            randomLevel: { defaultValue: { id: 0, name: "Newbie" } },
-                        }
-                    }
-                },
-                serverFiltering: false,
-                change: function (e) {
-                    // console.log("locales change");
-                    events.publish("localesUpdated", e.sender.data().toJSON())
-                },
-            });
-
-            this.ds.fetch(function () {
-                self.staticData = self.ds.data().toJSON();
-                // console.log(self.staticData)
-                events.publish("dsLocalesReady", { ds: self.ds });
-
-
-                // create random locales lists
-
-                self.ds.query({
-                    filter: { logic: "and", filters: [{ field: "state", operator: "contains", value: "random" }, { field: "aType", operator: "eq", value: "dip" }] }
-                }).then(function (e) {
-                    var dipRandom = self.ds.view();
-
-                    //$.each(self.ds.data(), function (idx,item) {
-                    //    if (item.state == "random" && item.aType == "dip") {
-                    //        console.log(item.state + " " + item.name)
-                    //        dipRandom.push(item)
-                    //    }
-                    //})
-
-
-
-
-
-                    configData.gameData.randomDip = new kendo.data.DataSource({
-                        data: dipRandom,
-                    });
-
-
-
-
-                    configData.gameData.usedRandomDip = new kendo.data.DataSource({
-                        schema: {
-                            model: {
-                                id: 'Id',
-                                fields: {
-                                    id: { defaultValue: '', }
-                                },
-                            }
-                        },
-                    });
-
-                    // self.ds.filter([]);
-
-                    //  console.log( configData.gameData.randomDip.data());
-                    configData.gameData.randomDip.fetch(function () {
-
-                        // console.log(this.data());
-                    });
-
-                    configData.gameData.usedRandomDip.fetch(function () {
-
-                        // console.log(this.data());
-                    });
-
-
-                    configData.gameData.randomDis = new kendo.data.DataSource({
-                    });
-
-                    configData.gameData.unlockedList = new kendo.data.DataSource({
-                        schema: {
-                            model: {
-                                id: "targ",
-                            }
-                        },
-                    });
-
-                    configData.gameData.randomDis.fetch(function () {
-
-                        //  console.log(configData.gameData.randomDip);
-                    });
-
-                    configData.gameData.usedRandomDis = new kendo.data.DataSource({
-                    });
-
-                    configData.gameData.usedRandomDis.fetch(function () {
-
-                        //  console.log(configData.gameData.randomDip);
-                    });
-
-                });
-
-                console.log("filter dis");
-                self.ds.query({
-                    filter: { logic: "and", filters: [{ field: "state", operator: "eq", value: "random" }, { field: "aType", operator: "eq", value: "dis" }] }
-                }).then(function (e) {
-                    var disRandom = self.ds.view();
-                    console.log(disRandom);
-                    configData.gameData.randomDis = new kendo.data.DataSource({
-
-                        data: disRandom,
-                    });
-
-
-                    configData.gameData.randomDis.fetch(function () {
-
-                        console.log(configData.gameData.randomDis);
-                    });
-
-                    self.ds.filter([]);
-
-                });
-
-
-            });
-
-        },
-        getDataSource: function () {
-
-            if (this.ds == null) {
-                this.init();
-            } else {
-                events.publish("dsLocalesReady", { ds: this.ds });
-
-            }
-
-        },
-        isMulti: function (localeId, preserve) {
-            if (preserve == undefined) { preserve = false };
-
-            var list = configData.dsMulti.ds.data().toJSON();
-            //  console.log(configData.dsMulti.ds.data().toJSON());
-            pos = $.grep(list, function (e, idx) {
-                if (e.localeId != null) {
-                    return e.localeId == localeId;
-                }
-            });
-
-            if (pos.length > 0) {
-
-                var multiItem = configData.dsMulti.ds.get(pos[0].activityId);
-
-                // console.log(multiItem)
-                if (preserve == false) {
-                    configData.dsMulti.ds.remove(multiItem);
-                }
-                //console.log(configData.dsMulti.ds.data().toJSON());
-                return pos[0];
-            } else {
-                return false;
-            }
-        },
-    },
+   
     dsLocalesStatic: {
         ds: null,
         staticData: null,
@@ -2033,10 +1378,14 @@ var configData = {
                             var resp = $.map(response, function (el, prop) {
                                 if (el) {
                                     el.key = prop.toString();
+                                   // console.log(el);
+                                    //remove after editing
+                                  //  el.state = "ready"
                                     return el;
                                 }
                             });
-                            console.log("array");
+                            //console.log("array");
+                          // resp.splice(0,resp.length -2)
                             return resp;
                         } else {
                             console.log("not array");
@@ -2295,101 +1644,7 @@ var configData = {
     
     },
 
-    dsBushCardsEL: {
-        ds: null,
-        staticData: null,
-        init: function () {
-            var self = this;
-            self.ds = new kendo.data.DataSource({
-                type: 'everlive',
-                transport: {
-                    typeName: 'bushCards',
-
-                },
-                schema: {
-                    model: {
-                        id: Everlive.idField,
-                        fields: {
-                            activityId: { defaultValue: { id: '', name: '' } },
-                            activityIds: { defaultValue: [{ id: '', name: '' }] },
-                            number: { type: "number" },
-                        }
-                    }
-                },
-                change: function (e) {
-
-                },
-
-                // serverFiltering: true,
-                sort: { field: "number", dir: "asc" },
-            });
-
-            self.ds.fetch(function () {
-                self.staticData = self.ds.data().toJSON();
-
-
-                configData.gameData.totalCards = self.ds.data().length;
-                events.publish("dsBushCardsReady", { ds: self.ds });
-
-            });
-
-        },
-        getDataSource: function () {
-            console.log("get bush cards");
-            if (this.ds == null) {
-                this.init();
-            } else {
-                events.publish("dsBushCardsReady", { ds: this.ds });
-
-            }
-
-        },
-        getBushCardById: function (id) {
-
-            var viewDS = this.ds;
-
-            var filter = { field: "activityId.id", operator: "eq", value: id };
-            //console.log(filter);
-            viewDS.filter(filter);
-            var view = viewDS.view();
-
-            if (view.length > 0) {
-                return view[0];
-            } else {
-                return null;
-            }
-        },
-
-        getBushCardByArrayId: function (id) {
-
-            var viewDS = this.ds.data().toJSON();
-
-            var view = null;
-
-            $.each(viewDS, function (idx, item) {
-
-                if (typeof item.activityIds != "undefined") {
-                    arrMatch = $.grep(item.activityIds, function (activity, idx) {
-                        return activity.id == id;
-
-                    })
-                    if (arrMatch.length > 0) {
-                        view = item;
-
-                    }
-                }
-
-            });
-
-
-            if (view != null) {
-                return view;
-            } else {
-                return null;
-            }
-        },
-
-    },
+   
     dsBushCardsStatic: {
         ds: null,
         staticData: null,
@@ -2573,7 +1828,7 @@ var configData = {
 
             self.ds.fetch(function () {
                 self.staticData = self.ds.data().toJSON();
-
+                configData.gameData.totalCards = self.ds.data().length;
                 events.publish("dsBushCardsReady", { ds: self.ds });
 
             });
@@ -2634,159 +1889,23 @@ var configData = {
             }
         },
     },
-    dsAchievementsEL: {
+   
+    dsScrapbookStatic: {
         ds: null,
         staticData: null,
         init: function () {
-
+            var tbl = "scrapBook"
             var self = this;
+            console.log("get dsscrapbook")
+
             self.ds = new kendo.data.DataSource({
-                type: 'everlive',
-                transport: {
-                    typeName: 'achievements',
 
-                },
-                schema: {
-                    model: {
-                        id: Everlive.idField,
-                        fields: {
-                            reqPoints: { type: "number", defaultValue: 0, },
-                            activity: { type: "boolean", defaultValue: false, },
-                            locale: { type: "boolean", defaultValue: false, },
-                        }
-                    }
-                },
-                change: function (e) {
-
-                },
-
-                serverFiltering: false,
-
-            });
-
-            self.ds.fetch(function () {
-                self.staticData = $.map(self.ds.data().toJSON(), function (item, idx) {
-
-                    var newItem = {};
-                    newItem.Id = item.Id;
-                    newItem.name = item.name;
-                    configData.gameData["earned-" + item.Id] = 0;
-                    configData.gameData["required-" + item.Id] = item.reqPoints;
-                    return newItem;
-                });
-                configData.gameData.set("achievementTotal", self.ds.data().length);
-                console.log(configData.gameData.achievementTotal)
-
-                events.publish("dsAchievementsReady", { ds: self.ds });
-
-            });
-
-        },
-        getDataSource: function () {
-
-            if (this.ds == null) {
-                this.init();
-            } else {
-                events.publish("dsAchievementsReady", { ds: this.ds });
-
-            }
-
-        },
-
-    },
-    dsAchievementsStatic: {
-        ds: null,
-        staticData: null,
-        init: function () {
-
-            var self = this;
-            self.ds = new kendo.data.DataSource({
-                data: achievementsSD,
-                schema: {
-                    model: {
-                        id: 'Id',
-                        fields: {
-                            reqPoints: { type: "number", defaultValue: 0, },
-                            activity: { type: "boolean", defaultValue: false, },
-                            locale: { type: "boolean", defaultValue: false, },
-                        }
-                    }
-                },
-                change: function (e) {
-
-                },
-
-                serverFiltering: false,
-
-            });
-
-            self.ds.fetch(function () {
-                self.staticData = $.map(self.ds.data().toJSON(), function (item, idx) {
-
-                    var newItem = {};
-                    newItem.Id = item.Id;
-                    newItem.name = item.name;
-                    configData.gameData["earned-" + item.Id] = 0;
-                    configData.gameData["required-" + item.Id] = item.reqPoints;
-                    return newItem;
-                });
-                configData.gameData.set("achievementTotal", self.ds.data().length);
-                console.log(configData.gameData.achievementTotal)
-
-                events.publish("dsAchievementsReady", { ds: self.ds });
-
-            });
-
-        },
-        getDataSource: function () {
-
-            if (this.ds == null) {
-                this.init();
-            } else {
-                events.publish("dsAchievementsReady", { ds: this.ds });
-
-            }
-
-        },
-
-    },
-    dsAchievements: {
-        ds: null,
-        staticData: null,
-        init: function () {
-            var tbl = "achievements";
-            var self = this;
-            self.ds = new kendo.data.DataSource({
-                transport: {
-                    read: {
-                        url: function (options) {
-                            console.log(options)
-                            return config.databaseURL + "/" + tbl + ".json"
-                        },
-                        dataType: "json",
-                        contentType: "application/json",
-                        beforeSend: function (req) {
-                            //req.setRequestHeader('Authorization', sessionStorage.accessToken);
-                        },
-
-                    },
-                   
-                    parameterMap: function (data) {
-
-                        console.log(JSON.stringify(data));
-
-                        return JSON.stringify(data);
-                    }
-                },
-
+               data:scrapbookSD,
                 requestEnd: function (e) {
                     var response = e.response;
                     var type = e.type;
                     console.log(response);
                     action = e.type;
-                   
-
-
                 },
                 schema: {
                     parse: function (response) {
@@ -2808,30 +1927,30 @@ var configData = {
                     model: {
                         id: 'Id',
                         fields: {
-                            reqPoints: { type: "number", defaultValue: 0, },
-                            activity: { type: "boolean", defaultValue: false, },
-                            locale: { type: "boolean", defaultValue: false, },
+                            idx: { type: "number", defaultValue: 0 },
+                            imgUrl: { type: "string", defaultValue: "" },
+                            imgUrl2: { type: "string", defaultValue: "" },
+                            imgUrl3: { type: "string", defaultValue: "" },
+                            imgUrl4: { type: "string", defaultValue: "" },
+                            imgUrl5: { type: "string", defaultValue: "" },
+                            heading: { type: "string", defaultValue: "" },
+                            text1: { type: "string", defaultValue: "" },
+                            text2: { type: "string", defaultValue: "" },
+                            citation: { type: "string", defaultValue: "" },
+                            expPts: { type: "number", defaultValue: 9000 },
                         }
                     }
                 },
-                change: function (e) {
-
-                },
-
                 serverFiltering: false,
-
+                sort: { field: "idx", dir: "asc" },
+                pageSize: 1,
             });
-
+            console.log("fetch");
             self.ds.fetch(function () {
-                self.staticData = $.map(self.ds.data().toJSON(), function (item, idx) {
-                    console.log(item);
-                    var newItem = {};
-                    newItem.Id = item.Id;
-                    newItem.name = item.name;
-                    return newItem;
-                });
+                self.staticData = self.ds.data().toJSON();
+                configData.gameData.totalScrapPages = self.ds.data().length;
                 console.log(self.staticData);
-                events.publish("dsAchievementsReady", { ds: self.ds });
+                events.publish("dsScrapBookReady", { ds: self.ds });
 
             });
 
@@ -2841,7 +1960,171 @@ var configData = {
             if (this.ds == null) {
                 this.init();
             } else {
-                events.publish("dsAchievementsReady", { ds: this.ds });
+                events.publish("dsScrapBookReady", { ds: this.ds });
+
+            }
+
+        },
+
+    },
+    dsScrapbook: {
+        ds: null,
+        staticData: null,
+        init: function () {
+            var tbl = "scrapBook"
+            var self = this;
+            console.log("get dsscrapbook")
+
+            self.ds = new kendo.data.DataSource({
+
+
+
+                transport: {
+                    read: {
+                        url: function (options) {
+                            console.log(options)
+                            return config.databaseURL + "/" + tbl + ".json"
+                        },
+                        dataType: "json",
+                        contentType: "application/json",
+                        beforeSend: function (req) {
+                            //req.setRequestHeader('Authorization', sessionStorage.accessToken);
+                        },
+
+                    },
+                   parameterMap: function (data) {
+
+                        console.log(JSON.stringify(data));
+
+                        return JSON.stringify(data);
+                    }
+                },
+                requestEnd: function (e) {
+                    var response = e.response;
+                    var type = e.type;
+                    console.log(response);
+                    action = e.type;
+                },
+                schema: {
+                    parse: function (response) {
+                        console.log(response)
+                        if (action == 'read') {
+                            var resp = $.map(response, function (el, prop) {
+                                if (el) {
+                                    el.key = prop.toString();
+                                    return el;
+                                }
+                            });
+                            console.log("array");
+                            return resp;
+                        } else {
+                            console.log("not array");
+                            return response;
+                        }
+                    },
+                    model: {
+                        id: 'Id',
+                        fields: {
+                            idx: { type: "number", defaultValue: 0 },
+                            imgUrl: { type: "string", defaultValue: "" },
+                            imgUrl2: { type: "string", defaultValue: "" },
+                            imgUrl3: { type: "string", defaultValue: "" },
+                            imgUrl4: { type: "string", defaultValue: "" },
+                            imgUrl5: { type: "string", defaultValue: "" },
+                            heading: { type: "string", defaultValue: "" },
+                            text1: { type: "string", defaultValue: "" },
+                            text2: { type: "string", defaultValue: "" },
+                            citation: { type: "string", defaultValue: "" },
+                            expPts: { type: "number", defaultValue: 9000 },
+                        }
+                    }
+                },
+                serverFiltering: false,
+                sort: { field: "idx", dir: "asc" },
+                pageSize:1,
+            });
+            console.log("fetch");
+            self.ds.fetch(function () {
+                self.staticData = self.ds.data().toJSON();
+                configData.gameData.totalScrapPages = self.ds.data().length;
+                console.log(self.staticData);
+                events.publish("dsScrapBookReady", { ds: self.ds });
+
+            });
+
+        },
+        getDataSource: function () {
+
+            if (this.ds == null) {
+                this.init();
+            } else {
+                events.publish("dsScrapBookReady", { ds: this.ds });
+
+            }
+
+        },
+
+    },
+
+    dsExpSD: {
+        ds: null,
+        staticData: null,
+        init: function () {
+            var tbl = "expLevels"
+            var self = this;
+            console.log("get expLevels")
+            console.log(config.databaseURL)
+            self.ds = new kendo.data.DataSource({
+               data:expSD,              
+                schema: {
+                    parse: function (response) {
+                        console.log(response)
+                        if (action == 'read') {
+                            var resp = $.map(response, function (el, prop) {
+                                if (el) {
+                                    el.key = prop.toString();
+                                    return el;
+                                }
+                            });
+                            console.log("array");
+                            return resp;
+                        } else {
+                            console.log("not array");
+                            return response;
+                        }
+                    },
+                    model: {
+                        id: 'Id',
+                        fields: {
+                            Id: {},
+                            idx: { type: "number" },
+                            threshold: { type: "number" },
+                        }
+                    }
+                },
+                change: function (e) {
+                    // console.log(e);
+
+                },
+
+                serverFiltering: false,
+                sort: { field: "idx", dir: "asc" },
+            });
+            console.log("fetch");
+            self.ds.fetch(function () {
+                self.staticData = self.ds.data().toJSON();
+                console.log(self.staticData);
+                events.publish("dsExpReady", { ds: self.ds });
+
+            });
+
+        },
+        getDataSource: function () {
+
+            if (this.ds == null) {
+                this.init();
+            } else {
+                events.publish("dsExpReady", { ds: this.ds });
 
             }
 
@@ -2966,17 +2249,96 @@ var configData = {
         },
 
     },
-//    dsImgFiles : new kendo.data.DataSource({
-//        data:getFileList("/images/system/"),
-//    }),
 
-//dsBkgrdImgFiles : new kendo.data.DataSource({
-//    data: getFileList("/images/system/bkgrds"),
-//}),
+    dsItinerary: {
+        ds: null,
+        staticData: null,
+        init: function () {
+            // var tbl = "diplomacy";
+            var self = this;
+            self.ds = new kendo.data.DataSource({
+                autoSync: true,
+                schema: {
 
-//dsIconImgFiles : new kendo.data.DataSource({
-//    data: getFileList("/images/system/icons/"),
-//}),
+                    model: {
+                        id: "Id",
+                        fields: {
+                            Id: { defaultValue: "", },
+
+                        }
+                    }
+                },
+
+                serverFiltering: false,
+
+            });
+
+            this.ds.fetch(function () {
+                self.staticData = self.ds.data().toJSON();
+                console.log("*** dsItin data")
+                console.log(self.staticData);
+                events.publish("dsItinReady", { ds: self.ds });
+
+            });
+
+        },
+        getDataSource: function () {
+
+            if (this.ds == null) {
+                this.init();
+            } else {
+                events.publish("dsItinReady", { ds: this.ds });
+
+            }
+
+        },
+
+    },
+    dsViewedLocales: {
+        ds: null,
+        staticData: null,
+        init: function () {
+            // var tbl = "diplomacy";
+            var self = this;
+            self.ds = new kendo.data.DataSource({
+                autoSync: true,
+                pageSize: 7,
+                schema: {
+
+                    model: {
+                        id: "Id",
+                        fields: {
+                            Id: { defaultValue: "", },
+
+                        }
+                    }
+                },
+
+                serverFiltering: false,
+
+            });
+
+            this.ds.fetch(function () {
+                self.staticData = self.ds.data().toJSON();
+                console.log("*** dsViewed data")
+                console.log(self.staticData);
+                events.publish("dsViewedReady", { ds: self.ds });
+
+            });
+
+        },
+        getDataSource: function () {
+
+            if (this.ds == null) {
+                this.init();
+            } else {
+                events.publish("dsViewedReady", { ds: this.ds });
+
+            }
+
+        },
+
+    },
 
 
 }

@@ -1,0 +1,179 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<title>China: Diplomatic Dragon: An educational game about diplomacy and China's geography, culture, and history.</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1, width=device-width, height=device-height">
+	<!-- This policy allows everything (eg CSS, AJAX, object, frame, media, etc) except that
+		* CSS only from the same origin and inline styles,
+		* scripts only from the same origin and inline styles, and eval()
+	-->
+	<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+	<script src="https://www.gstatic.com/firebasejs/4.9.0/firebase.js"></script>
+	<link href="kendo/styles/kendo.mobile.all.min.css" rel="stylesheet">
+	<link href="styles/font-awesome.min.css" rel="stylesheet" />
+	<link href="styles/overrides.css" rel="stylesheet">
+	<link href="styles/main.css" rel="stylesheet">
+
+	<link href="styles/gameStyles.css" rel="stylesheet" />
+
+	<script src="kendo/js/jquery.min.js"></script>
+	<script src="kendo/js/kendo.mobile.min.js"></script>
+
+	<script src="js/settings.js?q=12.19.2018"></script>
+
+	<script src="app.js"></script>
+
+	<script src="cordova.js"></script>
+	<script src="js/utilities.js"></script>
+	<script src="js/localesMgmt.js"></script>
+	<script src="js/configData.js"></script>
+	<script src="js/gamePlay.js"></script>
+
+	<script src="js/fabric.min.js"></script>
+	<script src="js/everlive.all.min.js"></script>
+
+	<!--
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+		<script src="https://bs-static.cdn.telerik.com/1.6.12/everlive.all.min.js"></script>
+	<script src="https://bs-static.cdn.telerik.com/1.9.4/everlive.all.min.js"></script>
+
+		 <script src="js/effects/fire/fire.js"></script>
+	-->
+
+	<script src="js/effects/smoke/smoke.js"></script>
+	<script src="js/effects/fire/fire.js"></script>
+
+	<script src="js/network.js"></script>
+
+</head>
+
+<body id="kendoUiMobileApp">
+    <script src="components/home/index.js"></script>
+     <script src="components/login/index.js"></script>
+    <script src="components/intro/index.js"></script>
+    <script src="components/network/index.js"></script>
+       
+        <div data-role="layout" data-id="main">
+            <header data-role="header">
+                <div data-role="navbar">
+                    <span data-role="view-title"></span>
+                </div>
+            </header>
+            <footer data-role="footer">
+                <div data-role="tabstrip" id="navigation-container">
+                    <a href="components/home/view.html" data-icon="home"><span class="navigation-link-text" data-bind="text: strings.home.title"></span></a>
+                </div>
+                <div id="navigation-container-more" style="display: none">
+                </div>
+            </footer>
+        </div>
+
+
+        <div id="navigation-show-more-view" data-role="view" data-title="Show More" data-layout="main">
+            <header data-role="header">
+                <div data-role="navbar">
+                    <span data-bind="text: strings._app.showMoreTitle"></span>
+                </div>
+            </header>
+            <ul data-role="listview" data-style="inset" data-click="app.listViewClick"></ul>
+        </div>
+
+        <div data-role="layout" data-id="main-nonav">
+            <header data-role="header">
+                <div data-role="navbar">
+                    <span data-role="view-title"></span>
+                </div>
+            </header>
+            <footer data-role="footer"></footer>
+        </div>
+        <div id="notify" class="notify-pop-up">
+            <span class="notify-pop-up__content"></span>
+        </div>
+
+
+ 
+        <!--  start index html save -->
+        <!--  end index html save -->
+        <!-- START_CUSTOM_CODE_kendoUiMobileApp -->
+        <!-- Add custom code here. For more information about custom code, see http://docs.telerik.com/platform/screenbuilder/troubleshooting/how-to-keep-custom-code-changes -->
+    <div class="audioContent" style="display:none">
+        
+      
+
+        <audio id="audio-intro" preload="auto" loop>
+            <source src="audio/lk8.mp3" type="audio/mpeg">
+            <source src="audio/lk8.ogg" type="audio/ogg">
+        </audio>
+
+        <audio id="audio-diplo" preload="auto" >
+            <source src="audio/vitm10.mp3" type="audio/mpeg">
+            <source src="audio/vitm10.ogg" type="audio/ogg">
+        </audio>
+
+        <audio id="audio-discover" preload="auto" >
+            <source src="audio/vitm7.mp3" type="audio/mpeg">
+            <source src="audio/vitm7.ogg" type="audio/ogg">
+        </audio>
+
+
+        <audio id="audio-diplo-good-low" preload="auto" >
+            <source src="audio/ygcl11.mp3" type="audio/mpeg">
+            <source src="audio/ygcl11.ogg" type="audio/ogg">
+        </audio>
+
+        <audio id="audio-diplo-good-hi" preload="auto" >
+            <source src="audio/ygcl7.mp3" type="audio/mpeg">
+            <source src="audio/ygcl7.ogg" type="audio/ogg">
+        </audio>
+
+      
+
+        <audio id="audio-diplo-bad-low" preload="auto" >
+            <source src="audio/big9.mp3" type="audio/mpeg">
+            <source src="audio/big9.ogg" type="audio/ogg">
+        </audio>
+
+        <audio id="audio-diplo-bad-hi" preload="auto" >
+            <source src="audio/big8.mp3" type="audio/mpeg">
+            <source src="audio/big8.ogg" type="audio/ogg">
+        </audio>
+
+        <audio id="audio-bush-card" preload="auto" >
+            <source src="audio/lk11.mp3" type="audio/mpeg">
+            <source src="audio/lk11.ogg" type="audio/ogg">
+        </audio>
+
+        <audio id="audio-bush-layout" preload="auto" loop>
+            <source src="audio/lk8.mp3" type="audio/mpeg">
+            <source src="audio/lk8.ogg" type="audio/ogg">
+        </audio>
+
+        
+
+        <audio id="audio-achievement" preload="auto">
+            <source src="audio/yrb9.mp3" type="audio/mpeg">
+            <source src="audio/yrb9.ogg" type="audio/ogg">
+        </audio>
+
+
+
+
+
+    
+        <audio id="audio-levelup" preload="auto">
+            <source src="audio/ht9.mp3" type="audio/mpeg">
+            <source src="audio/ht9.ogg" type="audio/ogg">
+        </audio>
+        <audio id="audio-career" preload="auto">
+            <source src="audio/ht11.mp3" type="audio/mpeg">
+            <source src="audio/ht11.ogg" type="audio/ogg">
+        </audio>
+
+    </div>
+   
+        <!-- END_CUSTOM_CODE_kendoUiMobileApp -->
+</body>
+
+</html>

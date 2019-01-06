@@ -4,7 +4,7 @@ var gameEnd = new Date("12/31/1975");
 var currentDate = gameStart;
 var key = "xgff4hx5ek3t5nz5";
 var adminRole = "835b06f0-8cf0-11e7-a148-29de9a0c5cc1";
-
+var notification;
 //var el;
 var fbKey = "AIzaSyB3WH41vPYpnlY8-wEWty8IBc0WXvMAcFs";
 var fbAuthDomain = "diplomacy-india.firebaseapp.com";
@@ -30,7 +30,7 @@ var collectedCards = 0;
 var maxCards = 10;
 
 var showGlow = false;
-
+var itinSlots = 9;
 //var bkgrdImg = "chinamap-ext4.jpg";
 //1280x766
 //var bkgrdImg = "chinamap-lrg3.jpg";
@@ -50,7 +50,7 @@ var expOffset = 20;
 var reducedPenalty = 1;
 var expReducedPenalty = .5;
 
-var glowEnabled = true;
+var glowEnabled = false;
 //0 50 200
 var ranks = [
     { name: "Newbie", prev: "", next: "Junior", points: 0, nextLevel: 75, description: "As a Newbie Diplomat, you’ll continue your work as an American diplomat in China, trying to build political, cultural, and economic relationships between the two countries. But now you’ll have better chances of success in all your activities. ", },
@@ -66,30 +66,12 @@ var messages = [
 ]
 
 var credits = [
-"China Map Illustrated by Maria Rabinky, (c) 2017 Rabinky Art, LLC",
-"Chinese Auto Factory - U.S. Department of State (Wikimedia Commons)",
-"Chinese New Year (iStock Photo)",
-"Cotton - public domain (Wikimedia Commons)",
-"Dragon Boat Race (iStock Photo)",
-"Everest (Himalayas) shrimpo1967derivative work: Papa Lima Whiskey 2 (Wikimedia Commons)",
-"Forbidden City - kallgan (Wikimedia Commons)",
-"Great Wall - Severin.stalder (Wikimedia Commons)",
-"Tutor (iStock Photo)",
-"Leshan Giant Buddha (Shutterstock)",
-"Li River (iStock Photo)",
-"Ming Tombs (Shutterstock)",
-"Mogao Caves - Zhangzhugang (Wikimedia Commons)",
-"Opera - 刻意 (Wikimedia Commons)",
-"Giant pandas (iStock Photo)",
-"Potala Palace - Coolmanjackey (Wikimedia Commons)",
-"Rice terraces - chensiyuan (Wikimedia Commons)",
-"Silk factory interior (iStock Photo)",
-"Table tennis - public domain (Wikimedia Commons)",
-"Tea terraces - Shizhao (Wikimedia Commons)",
-"Terracotta Army - Maros M r a z (Maros) (Wikimedia Commons)",
-"Three Gorges Dam - Rehman (Wikimedia Commons)",
-"Tiger (iStock Photo)",
-"Yangtze River cruise - Andrew Hitchcock (Wikimedia Commons)"
+"India Map Illustrated by Maria Rabinky, (c) 2019 Rabinky Art, LLC",
+    "iStock by Getty Images:",
+    " bpbomb, Dyan_k, manjik, Radiokukka, pilesasmiles, Gilitukha, tinnaporn, Rafal Cichawa, PhonlamaiPhoto, HemantMandot, guenterguni",
+    "",
+    "Wikimedia Commons: ",
+   "Bharatahs , A.Savin,  Aaron Schaub,Yathin S Krishnappa, Fitindia, Daderot , Ken Wieland, Chippu Abraham, Ajith Kumar, Vijayakumarblathur, IM3847, Shyamvs78, Cherishsantosh, Indrajit Das, Bhaskaranaidu, Sreehuledamana, Yann Forget, CSIRO, കാക്കര, Marc Shandro, Getsuhas08, Flicka, Jan Bockaert, Paul Hamilton, Karthik Nadar, Antônio Milena, Augustus Binu, Biswarup Ganguly, Ashwin Kumar"
 ];
 
 var audioList = {};
@@ -133,6 +115,10 @@ $(document).ready(function () {
     audioList.discover = document.getElementById("audio-discover");
     audioList.levelUp = document.getElementById("audio-levelup");
     audioList.career = document.getElementById("audio-career");
+
+    audioList.itinerary = document.getElementById("audio-itinerary");
+    audioList.scrapbook = document.getElementById("audio-scrapbook");
+    audioList.gameover = document.getElementById("audio-gameover");
 
 });
 
